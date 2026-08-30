@@ -608,6 +608,19 @@
 
     <div id="confetti-container"></div>
 
+    <script>
+  // Make Material Symbols icons visible once fonts are ready
+  document.fonts.ready.then(() => {
+    document.documentElement.classList.add('fonts-loaded');
+  });
+  // Fallback in case the font doesn't load within 5 seconds
+  setTimeout(() => {
+    if (!document.documentElement.classList.contains('fonts-loaded')) {
+      document.documentElement.classList.add('fonts-loaded');
+    }
+  }, 5000);
+</script>
+
     <!-- ========== JAVASCRIPT (slot logic + Firebase sync + header auth) ========== -->
     <script type="module">
         // ===================== FIREBASE =====================
