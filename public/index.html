@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scatter Slot – Full Stack</title>
+    <title>Scatter Slot – Coins Edition</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
@@ -311,9 +311,9 @@
     <div class="game-container" id="gameContainer">
         <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
         <h1>🎰 SCATTER SLOTS</h1>
-        <div class="balance" id="balance">💰 Balance: $<span id="balanceValue">0</span></div>
+        <div class="balance" id="balance">💰 Balance: 🪙<span id="balanceValue">0</span></div>
         <div class="bet-control">
-            <label for="bet">Bet: $</label>
+            <label for="bet">Bet: 🪙</label>
             <input type="number" id="bet" value="1" min="1" max="100">
         </div>
         <div class="reels-container" id="reelsContainer"></div>
@@ -328,7 +328,7 @@
         </div>
         <div class="message" id="message"></div>
         <div class="free-spins-msg" id="freeSpinsMsg"></div>
-        <div class="scatter-info">⭐ = Scatter | 3⭐ = 5x + 5 spins | 4⭐ = 10x + 10 spins | 5⭐ = 50x + 20 spins | 6⭐ = 100x + 30 spins | 7⭐ = 200x + 50 spins</div>
+        <div class="scatter-info">⭐ = Scatter | 3⭐ = 2x + 2 spins | 4⭐ = 5x + 4 spins | 5⭐ = 10x + 8 spins | 6⭐ = 20x + 12 spins | 7⭐ = 50x + 20 spins</div>
         <div class="win-overlay" id="winOverlay"></div>
     </div>
     <div id="confetti-container"></div>
@@ -608,14 +608,13 @@
         function showTotalWinOverlay(amount) {
             const overlay = document.createElement('div');
             overlay.className = 'total-win-overlay';
-            overlay.innerHTML = `🎉 Free spins completed!<br>Total Won: $${amount}`;
+            overlay.innerHTML = `🎉 Free spins completed!<br>Total Won: 🪙${amount}`;
             document.body.appendChild(overlay);
             setTimeout(() => overlay.remove(), 3000);
         }
 
         // ===================== SPIN LOGIC (MODIFIED FOR AUTO-SPIN) =====================
         async function spin(isFreeSpin = false, callback = null) {
-            // Allow auto-spin even if spinBtn is disabled, but block manual double-spins
             if (spinBtn.disabled && !isFreeSpin && !autoSpinning) return;
 
             spinBtn.disabled = true;
@@ -697,7 +696,7 @@
                     if (data.scatters >= 3) {
                         highlightScatters(finalGrid, finalTranslateYs);
                         playWinSound();
-                        showWinOverlay(`WIN $${data.winAmount}!`);
+                        showWinOverlay(`WIN 🪙${data.winAmount}!`);
                         gameContainer.classList.add('win-animation');
                         setTimeout(() => gameContainer.classList.remove('win-animation'), 1800);
                         const confettiCount = data.scatters >= 5 ? 100 : 50;
@@ -706,7 +705,7 @@
 
                     let msg = "";
                     if (data.scatters >= 3) {
-                        msg = `✨ ${data.scatters} scatters! You win $${data.winAmount}`;
+                        msg = `✨ ${data.scatters} scatters! You win 🪙${data.winAmount}`;
                         if (data.freeSpinsAwarded > 0) {
                             msg += ` + ${data.freeSpinsAwarded} free spins!`;
                             playFreeSpinsSound();
@@ -716,12 +715,10 @@
                     }
                     messageDiv.textContent = msg;
 
-                    // Button state for auto-spin
                     spinBtn.disabled = autoSpinning;
                     autoSpinBtn.disabled = autoSpinning;
                     stopBtn.disabled = !autoSpinning;
 
-                    // Handle free spins first
                     if (data.freeSpinsRemaining > 0) {
                         setTimeout(() => spin(true, callback), 1500);
                     } else {
@@ -760,13 +757,11 @@
             spinBtn.disabled = true;
             autoSpinCountInput.disabled = true;
 
-            // Start first spin with callback
             spin(false, autoSpinCallback);
         }
 
         function autoSpinCallback() {
             if (!autoSpinning) {
-                // Stopped manually
                 spinBtn.disabled = false;
                 autoSpinBtn.disabled = false;
                 stopBtn.disabled = true;
@@ -774,9 +769,7 @@
                 return;
             }
 
-            // Check if we still have spins left
             if (autoSpinsRemaining <= 1) {
-                // This was the last spin
                 autoSpinsRemaining = 0;
                 autoSpinning = false;
                 spinBtn.disabled = false;
@@ -789,7 +782,6 @@
 
             autoSpinsRemaining--;
 
-            // Check balance
             const currentBalance = parseInt(balanceValueSpan.textContent);
             const bet = parseInt(betInput.value);
             if (currentBalance < bet || bet < 1) {
@@ -798,11 +790,10 @@
                 autoSpinBtn.disabled = false;
                 stopBtn.disabled = true;
                 autoSpinCountInput.disabled = false;
-                messageDiv.textContent = "Auto spin stopped: insufficient balance.";
+                messageDiv.textContent = "Auto spin stopped: insufficient coins.";
                 return;
             }
 
-            // Schedule next spin after a short delay
             autoSpinTimer = setTimeout(() => {
                 spin(false, autoSpinCallback);
             }, 1500);
@@ -817,7 +808,6 @@
             }
             stopBtn.disabled = true;
             autoSpinCountInput.disabled = false;
-            // Buttons will be fully re-enabled after current spin ends (in callback)
         }
 
         // ===================== EVENT LISTENERS =====================
