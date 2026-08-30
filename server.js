@@ -3,7 +3,7 @@ const session = require('express-session');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000; // <-- Changed line
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
@@ -31,8 +31,8 @@ const SYMBOLS = [
     { icon: 'music_note',color: '#e91e63' }
 ];
 const SCATTER_ICON = 'star';
-const SCATTER_PAYOUTS = { 3: 5, 4: 10, 5: 50, 6: 100, 7: 200 };
-const FREE_SPINS = { 3: 5, 4: 10, 5: 20, 6: 30, 7: 50 };
+const SCATTER_PAYOUTS = { 3: 2, 4: 5, 5: 10, 6: 20, 7: 50 };  // Lower multipliers
+const FREE_SPINS = { 3: 2, 4: 4, 5: 8, 6: 12, 7: 20 };        // Fewer free spins
 const VISIBLE_ROWS = 3;
 const REEL_COUNT = 5;
 
@@ -82,18 +82,16 @@ app.get('/api/state', (req, res) => {
 // Spin endpoint (regular spin or free spin)
 app.post('/api/spin', (req, res) => {
     initGame(req);
-    const { isFreeSpin = false } = req.body; // boolean
+    const { isFreeSpin = false } = req.body;
     let betAmount = 0;
 
     if (isFreeSpin) {
-        // Free spin: use last bet, but must have free spins available
         if (req.session.freeSpins <= 0) {
             return res.status(400).json({ error: 'No free spins available.' });
         }
         req.session.freeSpins--;
         betAmount = req.session.lastBet;
     } else {
-        // Regular spin: bet amount provided by client, validate
         betAmount = parseInt(req.body.bet);
         if (isNaN(betAmount) || betAmount < 1 || betAmount > req.session.balance) {
             return res.status(400).json({ error: 'Invalid bet amount.' });
@@ -102,17 +100,16 @@ app.post('/api/spin', (req, res) => {
         req.session.lastBet = betAmount;
     }
 
-    // Generate result
     const grid = generateGrid();
     const scatters = countScatters(grid);
     let winAmount = 0;
     let freeSpinsAwarded = 0;
 
     if (scatters >= 3) {
-        const multiplier = SCATTER_PAYOUTS[scatters] || 500;
+        const multiplier = SCATTER_PAYOUTS[scatters] || 2;
         winAmount = betAmount * multiplier;
         req.session.balance += winAmount;
-        freeSpinsAwarded = FREE_SPINS[scatters] || 100;
+        freeSpinsAwarded = FREE_SPINS[scatters] || 2;
         req.session.freeSpins += freeSpinsAwarded;
     }
 
@@ -127,7 +124,6 @@ app.post('/api/spin', (req, res) => {
     });
 });
 
-// Start server
 app.listen(PORT, () => {
     console.log(`Scatter slot server running at http://localhost:${PORT}`);
 });
