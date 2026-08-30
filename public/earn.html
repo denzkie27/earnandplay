@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src='//libtl.com/sdk.js' data-zone='10973078' data-sdk='show_10973078'></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Earn Coins — YOUR TV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
+
+  <style>
+/* ── Remove mobile tap highlight from EVERY element ── */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Remove focus outline for mouse clicks (keep for keyboard navigation) ── */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+    /* ========== ROOT VARIABLES ========== */
+    :root {
+      --icon-size: 22px;
+      --icon-thin: 200;
+      --accent: #e50914;
+      --accent-hover: #f40612;
+    }
+
+    /* ========== GLOBAL SCROLLBAR STYLES ========== */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(229, 9, 20, 0.3) transparent;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 10px;
+      margin: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(229, 9, 20, 0.4), rgba(255, 122, 0, 0.4));
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(229, 9, 20, 0.7), rgba(255, 122, 0, 0.7));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb:active {
+      background: linear-gradient(180deg, rgba(229, 9, 20, 0.9), rgba(255, 122, 0, 0.9));
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+
+    @media (min-width: 769px) {
+      body::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      body::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, rgba(229, 9, 20, 0.5), rgba(255, 122, 0, 0.5));
+        box-shadow: inset 0 0 6px rgba(229, 9, 20, 0.1);
+      }
+      
+      body::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, rgba(229, 9, 20, 0.8), rgba(255, 122, 0, 0.8));
+        box-shadow: inset 0 0 10px rgba(229, 9, 20, 0.2);
+      }
+    }
+
+    /* ========== BASE & ICONS ========== */
+    .nx-icon {
+      font-family: 'Material Symbols Outlined', sans-serif;
+      font-weight: var(--icon-thin);
+      font-size: var(--icon-size);
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      vertical-align: middle;
+      flex-shrink: 0;
+      user-select: none;
+      transition: all .15s ease;
+      color: transparent;
+    }
+    .fonts-loaded .nx-icon { color: inherit; }
+    .nx-icon--sm { font-size: 18px; }
+    .nx-icon--xs { font-size: 16px; }
+    .nx-icon--md { font-size: 22px; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #fff;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.45),
+          rgba(0, 0, 0, 0.92)
+        ),
+        radial-gradient(circle at top, rgba(229, 9, 20, 0.22) 0%, rgba(20, 20, 20, 0.15) 35%, rgba(0, 0, 0, 1) 75%),
+        linear-gradient(to right, #050505, #111, #050505);
+      background-attachment: scroll;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top center, rgba(229, 9, 20, 0.16), transparent 55%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 30%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ========== HEADER ========== */
+    .nf-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 10, 10, .7);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-icon-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      background: rgba(255, 255, 255, .04);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all .2s;
+      text-decoration: none;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, .06);
+    }
+    .header-icon-btn:hover {
+      background: rgba(255, 255, 255, .12);
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, .15);
+    }
+    .header-icon-btn .nx-icon {
+      font-size: 22px;
+      opacity: .85;
+    }
+    .coins-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .coins {
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .08);
+      padding: 7px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .coin-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    .earn-btn,
+    .auth-btn-header {
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+      font-family: inherit;
+      transition: .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: .01em;
+    }
+    .earn-btn {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(229, 9, 20, .3);
+    }
+    .earn-btn:hover {
+      background: var(--accent-hover);
+      transform: scale(1.03);
+    }
+    .auth-btn-header {
+      background: rgba(255, 255, 255, .06);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .08);
+    }
+    .auth-btn-header:hover {
+      background: rgba(255, 255, 255, .12);
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid rgba(255, 255, 255, .08);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: .2s;
+      position: relative;
+    }
+    .user-info:hover {
+      background: rgba(255, 255, 255, .1);
+    }
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 6px;
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, .08);
+      border-radius: 14px;
+      overflow: hidden;
+      min-width: 180px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .6);
+      display: none;
+      z-index: 99999;
+      padding: 4px 0;
+    }
+    .user-dropdown a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      color: rgba(255, 255, 255, .75);
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: .15s;
+      cursor: pointer;
+    }
+    .user-dropdown a:hover {
+      background: rgba(255, 255, 255, .06);
+      color: #fff;
+    }
+    .user-dropdown .logout-opt {
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      color: #ff5a5a;
+    }
+    .user-dropdown .logout-opt:hover {
+      background: rgba(255, 90, 90, .08);
+      color: #ff5a5a;
+    }
+    .user-dropdown .nx-icon {
+      font-size: 18px;
+      opacity: .6;
+    }
+
+    /* ========== MAIN CONTAINER ========== */
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 30px 16px 40px;
+    }
+    .main-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      padding: 30px 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+    .main-card::before {
+      content: "";
+      position: absolute;
+      top: -60%;
+      left: -30%;
+      width: 160%;
+      height: 160%;
+      background: radial-gradient(circle, rgba(255, 0, 60, 0.06), transparent 60%);
+      pointer-events: none;
+    }
+    .coin-logo-wrap {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .coin-logo {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      display: inline-block;
+      animation: floatCoin 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.6))
+        drop-shadow(0 0 30px rgba(255, 215, 0, 0.3));
+    }
+    @keyframes floatCoin {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+    .page-title {
+      text-align: center;
+      font-size: 30px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, #fff, #f9a8d4, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .coins-big {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .coin-icon-big {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+    #coins {
+      color: #facc15;
+      font-size: 36px;
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.5), 0 0 20px rgba(250, 204, 21, 0.3);
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      width: 100%;
+      border: none;
+      cursor: pointer;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      transition: 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      box-shadow: 0 8px 25px rgba(139, 92, 24, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(236, 72, 153, 0.4);
+    }
+    .btn-primary:active {
+      transform: scale(.98);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff003c, #ff7a00);
+      box-shadow: 0 5px 18px rgba(255, 0, 60, 0.3);
+    }
+    .btn-secondary:hover {
+      transform: translateY(-3px);
+    }
+    .btn-secondary:active {
+      transform: scale(.98);
+    }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+    .promo-section {
+      margin-top: 8px;
+    }
+    .promo-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #aaa;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .promo-box {
+      display: flex;
+      gap: 10px;
+    }
+    .promo-box input {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      border: none;
+      outline: none;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 15px;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    .promo-box input:focus {
+      border-color: #ff003c;
+      box-shadow: 0 0 0 3px rgba(255, 0, 60, 0.15);
+    }
+    .promo-box input::placeholder {
+      color: rgba(255, 255, 255, 0.35);
+    }
+    .promo-box button {
+      flex-shrink: 0;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      color: #fff;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 5px 15px rgba(34, 197, 94, 0.25);
+      transition: 0.2s;
+      font-family: inherit;
+    }
+    .promo-box button:hover {
+      transform: translateY(-2px);
+    }
+    .instructions {
+      margin-top: 24px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      text-align: left;
+    }
+    .instructions h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #f9a8d4;
+    }
+    .instructions ol {
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+      color: #ccc;
+      font-size: 14px;
+    }
+    .coin-popup {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 18px 30px;
+      border-radius: 20px;
+      color: #facc15;
+      font-size: 26px;
+      font-weight: bold;
+      box-shadow: 0 0 30px rgba(250, 204, 21, 0.4);
+      pointer-events: none;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: floatUp 1.2s ease forwards;
+    }
+    .coin-popup .popup-icon {
+      width: 28px;
+      height: 28px;
+    }
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translate(-50%, -20%); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -110%); }
+    }
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 10000;
+      animation: dialogFadeIn 0.25s ease;
+    }
+    @keyframes dialogFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .dialog-box {
+      max-width: 420px;
+      width: 100%;
+      background: #151515;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 255, 255, 0.03);
+      animation: dialogPop 0.3s ease;
+    }
+    @keyframes dialogPop {
+      from { opacity: 0; transform: scale(.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px 20px 0;
+      font-size: 40px;
+    }
+    .dialog-icon {
+      width: 44px;
+      height: 44px;
+    }
+    .dialog-body {
+      padding: 18px 20px 24px;
+      text-align: center;
+    }
+    .dialog-message {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.6;
+      color: #eee;
+      margin-bottom: 20px;
+    }
+    .dialog-sub {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .dialog-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.2s;
+      background: linear-gradient(135deg, #ff003c, #ff7a00);
+      box-shadow: 0 6px 20px rgba(255, 0, 60, 0.3);
+      font-family: inherit;
+    }
+    .dialog-btn:hover {
+      transform: translateY(-2px);
+    }
+    .dialog-btn:active {
+      transform: scale(.98);
+    }
+    .dialog-btn-green {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+    }
+    .dialog-btn-ghost {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: none;
+    }
+    .dialog-btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .dialog-btn-row {
+      display: flex;
+      gap: 10px;
+    }
+    .dialog-btn-row .dialog-btn {
+      flex: 1;
+    }
+
+    /* ========== SUPPORT FAB ========== */
+    .support-fab {
+      position: fixed;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      right: 24px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(99, 102, 241, 0.45);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .support-fab:hover {
+      transform: scale(1.1) rotate(-5deg);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.55);
+    }
+    .support-fab:active {
+      transform: scale(0.9);
+    }
+    .support-fab .unread-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ff003c;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      box-shadow: 0 2px 10px rgba(255, 0, 60, 0.4);
+      border: 2px solid #111;
+    }
+    .support-fab .unread-badge.show { display: flex; }
+
+    /* ==================== REDESIGNED SUPPORT DIALOG ==================== */
+    .dialog-overlay.support-overlay {
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      animation: supportOverlayIn .35s ease forwards;
+    }
+
+    .dialog-overlay.support-overlay.show {
+      display: flex;
+    }
+
+    @keyframes supportOverlayIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .support-dialog-box {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      animation: supportDialogIn .4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes supportDialogIn {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Desktop: taller but not full screen */
+    @media (min-width: 769px) {
+      .support-dialog-box {
+        max-width: 600px;
+        height: 92vh;
+        height: 92dvh;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+      }
+
+      .support-dialog-inner {
+        border-radius: 24px;
+      }
+
+      .dialog-overlay.support-overlay {
+        padding: 4vh 20px;
+      }
+    }
+
+    /* Mobile: true full screen */
+    @media (max-width: 768px) {
+      .support-dialog-box {
+        max-width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        border-radius: 0;
+      }
+
+      .support-dialog-inner {
+        border-radius: 0;
+      }
+
+      .dialog-overlay.support-overlay {
+        padding: 0;
+      }
+    }
+
+    .support-dialog-inner {
+      background: linear-gradient(160deg, #111827, #0b0f19);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Support Header */
+    .support-header-new {
+      padding: 20px 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .support-back-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      color: #888;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+
+    .support-back-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .support-back-btn:active {
+      transform: scale(0.9);
+    }
+
+    .support-header-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .support-title-new {
+      font-size: 18px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #818cf8, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.3;
+    }
+
+    .support-sub-new {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 2px;
+    }
+
+    /* Input Area - AT TOP */
+    .support-input-area-new {
+      padding: 16px 20px;
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .support-input-area-new input {
+      flex: 1;
+      padding: 14px 18px;
+      border: none;
+      outline: none;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 15px;
+      transition: 0.2s;
+      margin-bottom: 0;
+      font-family: inherit;
+    }
+
+    .support-input-area-new input:focus {
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 4px 18px rgba(99, 102, 241, 0.15);
+      transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .support-input-area-new input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .support-send-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+      -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+
+    .support-send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .support-send-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .support-send-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Messages Area - BELOW INPUT */
+    .support-messages-new {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(99, 102, 241, 0.4) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .support-messages-new::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .support-messages-new::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      margin: 4px 0;
+    }
+
+    .support-messages-new::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.4));
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .support-messages-new::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.7), rgba(139, 92, 246, 0.7));
+    }
+
+    .support-msg-new {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 85%;
+      animation: msgInNew .3s ease;
+    }
+
+    @keyframes msgInNew {
+      0% { opacity: 0; transform: translateY(12px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .support-msg-new.user {
+      align-self: flex-end;
+    }
+
+    .support-msg-new.admin {
+      align-self: flex-start;
+    }
+
+    .support-msg-new .msg-bubble {
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      word-wrap: break-word;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .support-msg-new.user .msg-bubble {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      border-bottom-right-radius: 6px;
+    }
+
+    .support-msg-new.admin .msg-bubble {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #ddd;
+      border-bottom-left-radius: 6px;
+    }
+
+    .support-msg-new .msg-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 6px;
+    }
+
+    .support-msg-new.admin .msg-label {
+      color: #818cf8;
+    }
+
+    .support-empty-new {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.3);
+      padding: 40px 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    .support-empty-new .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media(max-width: 900px) {
+      .nf-header { padding: 6px 8px; }
+      .coins { font-size: 11px; padding: 4px 7px; border-radius: 10px; }
+      .earn-btn, .auth-btn-header { font-size: 10px; padding: 4px 10px; border-radius: 6px; }
+      .user-info { font-size: 10px; padding: 4px 7px; border-radius: 6px; }
+    }
+    @media(max-width: 768px) {
+      body { background: #0a0a0a; }
+      body::before, body::after { display: none; }
+    }
+    @media(max-width: 600px) {
+      .page-title { font-size: 24px; }
+      .support-input-area-new {
+        padding: 12px 16px;
+        gap: 8px;
+      }
+      .support-input-area-new input {
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+      .support-send-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+      }
+      .support-messages-new {
+        padding: 16px;
+        gap: 10px;
+      }
+      .support-msg-new {
+        max-width: 88%;
+      }
+      .support-header-new {
+        padding: 16px 16px 14px;
+      }
+    }
+    @media(max-width: 480px) {
+      .page-title { font-size: 20px; }
+      .header-icon-btn { width: 34px; height: 34px; }
+      .header-icon-btn .nx-icon { font-size: 20px; }
+      .support-fab {
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        right: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body onclick="closeAllDropdowns(event)">
+  <!-- ========== HEADER ========== -->
+  <header class="nf-header">
+    <div class="header-left">
+      <button class="header-icon-btn" onclick="history.back()"><span class="nx-icon">arrow_back</span></button>
+      <a href="index.html" class="header-icon-btn"><span class="nx-icon">home</span></a>
+    </div>
+    <div class="coins-box">
+      <div class="coins">
+        <svg class="coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+          <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+        </svg>
+        <span id="coinsHeader">0</span>
+      </div>
+      <button class="earn-btn" id="earnBtn"><span class="nx-icon nx-icon--sm"></span> Earn</button>
+      <button class="auth-btn-header" id="authLoginBtn" style="display:none;"><span class="nx-icon nx-icon--sm">login</span> Sign In</button>
+      <div class="user-info" id="userInfo" style="display:none;" onclick="toggleDropdown(event)">
+        <span class="nx-icon">account_circle</span>
+        <span class="nx-icon nx-icon--xs" style="opacity:.5;">expand_more</span>
+        <div class="user-dropdown" id="userDropdown">
+          <a onclick="event.stopPropagation(); location.href='profile.html'"><span class="nx-icon">person</span> My Profile</a>
+          <a onclick="event.stopPropagation(); location.href='watchlist.html'"><span class="nx-icon">bookmark</span> Watchlist</a>
+          <a onclick="event.stopPropagation(); location.href='settings.html'"><span class="nx-icon">settings</span> Settings</a>
+          <a class="logout-opt" id="logoutLink" onclick="event.stopPropagation(); logout()"><span class="nx-icon">logout</span> Sign Out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="main-card">
+      <div class="coin-logo-wrap">
+        <img src="https://cdn.wapka.org/00h8nc/f6c4ed99255dfa6f1124d5eb08c4c514/peso.png" class="coin-logo" alt="Coin" />
+      </div>
+      <div class="page-title">Earn Coins</div>
+      <div class="subtitle">Watch ads & unlock premium content</div>
+
+      <div class="coins-big">
+        <svg class="coin-icon-big" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+          <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+        </svg>
+        <span id="coins">0</span>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="rewardInterstitial()">🎬 Reward Interstitial (+5)</button>
+        <button class="btn btn-secondary" onclick="rewardPopup()">📺 Reward Popup (+5)</button>
+        <button class="btn btn-ghost" onclick="location.href='withdraw.html'">💸 Withdraw Coins</button>
+        <button class="btn btn-ghost" onclick="location.href='index.html'">⬅ Back to Browse</button>
+      </div>
+
+      <div class="promo-section">
+        <span class="promo-label">🎁 Have a promo code?</span>
+        <div class="promo-box">
+          <input type="text" id="promoInput" placeholder="Enter promo code..." />
+          <button onclick="redeemPromo()">Redeem</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="instructions">
+      <h3 style="color:#f9a8d4;">📌 How to Earn Coins</h3>
+      <ol>
+        <li>Click <strong>Reward Interstitial</strong> or <strong>Reward Popup</strong> above.</li>
+        <li>Click <strong>Get Reward</strong> when prompted.</li>
+        <li>Let the ad fully load in the new window — wait a few seconds.</li>
+        <li>Close the ad window to return here and claim your coins.</li>
+        <li>Repeat to accumulate coins and unlock any movie or TV show!</li>
+      </ol>
+    </div>
+  </div>
+
+  <div id="dialogContainer"></div>
+
+  <button class="support-fab" aria-label="Open Support Chat" id="supportFab" onclick="openSupport()">💬<span class="unread-badge" id="supportUnread">0</span></button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc,
+      increment,
+      onSnapshot,
+      collection,
+      query,
+      where,
+      getDocs,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
+      authDomain: "yourtv-c12eb.firebaseapp.com",
+      projectId: "yourtv-c12eb",
+      storageBucket: "yourtv-c1eb.firebasestorage.app",
+      messagingSenderId: "28690991912",
+      appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
+      measurementId: "G-CC7DLZS0NB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let unsubscribeCoins = null;
+    let supportUnsubscribe = null;
+
+    // Font loading
+    document.fonts.ready.then(() => { document.documentElement.classList.add('fonts-loaded'); });
+    setTimeout(() => {
+      if (!document.documentElement.classList.contains('fonts-loaded')) document.documentElement.classList.add('fonts-loaded');
+    }, 5000);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById("userInfo").style.display = "flex";
+        document.getElementById("authLoginBtn").style.display = "none";
+        await ensureUserExists();
+        listenToCoins();
+      } else {
+        window.location.href = 'login.html';
+      }
+    });
+
+    async function ensureUserExists() {
+      if (!currentUser) return;
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) {
+        await setDoc(userRef, { coins: 0, promoUsed: false, createdAt: new Date() });
+      }
+    }
+
+    function listenToCoins() {
+      if (!currentUser) return;
+      if (unsubscribeCoins) unsubscribeCoins();
+      const userRef = doc(db, "users", currentUser.uid);
+      unsubscribeCoins = onSnapshot(userRef, (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          updateUI(data.coins || 0);
+        }
+      });
+    }
+
+    async function addCoins(amount) {
+      if (!currentUser) return;
+      const userRef = doc(db, "users", currentUser.uid);
+      try {
+        await setDoc(userRef, { coins: increment(amount) }, { merge: true });
+        showCoinPopup(amount);
+      } catch (e) {
+        alert("Error updating coins.");
+      }
+    }
+
+    // NEW: Update slot game balance (server-side session)
+    async function addCoinsToSlot(amount) {
+      try {
+        const res = await fetch('/api/add-coins', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to update slot balance');
+        console.log('Slot balance updated:', data.newBalance);
+      } catch (err) {
+        console.error('Could not update slot balance:', err);
+      }
+    }
+
+    function updateUI(coins) {
+      const coinValue = Math.floor(coins);
+      document.getElementById("coins").innerText = coinValue;
+      document.getElementById("coinsHeader").innerText = coinValue;
+    }
+
+    function showCoinPopup(amount) {
+      const popup = document.createElement("div");
+      popup.className = "coin-popup";
+      popup.innerHTML = `
+        <svg class="popup-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+          <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+        </svg>
+        +${amount}
+      `;
+      document.body.appendChild(popup);
+      setTimeout(() => popup.remove(), 1200);
+    }
+
+    window.rewardInterstitial = async function() {
+      if (typeof show_10973078 !== "function") return alert("Ads not loaded yet.");
+      try {
+        await show_10973078();
+        await addCoins(5);        // Update Firebase
+        await addCoinsToSlot(5);  // Update slot game balance (same browser)
+        showCustomDialog("✅ +5 Coins Earned!", "Your coins have been added. Keep going!", "Awesome!");
+      } catch (e) { console.error(e); }
+    };
+
+    window.rewardPopup = async function() {
+      if (typeof show_10973078 !== "function") return alert("Ads not loaded yet.");
+      try {
+        await show_10973078('pop');
+        await addCoins(5);
+        await addCoinsToSlot(5);
+        showCustomDialog("✅ +5 Coins Earned!", "Your coins have been added!", "Awesome!");
+      } catch (e) { console.error(e); }
+    };
+
+    window.redeemPromo = async function() {
+      if (!currentUser) return;
+      const inputField = document.getElementById("promoInput");
+      const code = inputField.value.trim().toUpperCase();
+      if (!code) return alert("Please enter a code!");
+
+      try {
+        const promoCol = collection(db, "promocodes");
+        const q = query(promoCol, where("code", "==", code));
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          return alert("❌ Invalid Promo Code!");
+        }
+
+        const promoDoc = snapshot.docs[0];
+        const promoData = promoDoc.data();
+        const promoAmount = promoData.amount || 0;
+
+        if (promoData.type === "onetime" && promoData.used === true) {
+          return alert("❌ This one-time promo code has already been used!");
+        }
+
+        const userRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userRef, {
+          coins: increment(promoAmount)
+        });
+
+        if (promoData.type === "onetime") {
+          await updateDoc(promoDoc.ref, {
+            used: true,
+            usedBy: currentUser.uid,
+            usedAt: new Date()
+          });
+        }
+
+        showCustomDialog("🎉 Promo Redeemed!", `You've received ${promoAmount} coins!`, "Let's go!", "dialog-btn-green");
+        inputField.value = "";
+      } catch (e) {
+        console.error(e);
+        alert("Error redeeming code. Please check your connection.");
+      }
+    };
+
+    function showCustomDialog(msg, sub, btnText, btnClass = "") {
+      const container = document.getElementById("dialogContainer");
+      const overlay = document.createElement("div");
+      overlay.className = "dialog-overlay";
+      overlay.innerHTML = `
+        <div class="dialog-box">
+          <div class="dialog-header">💰</div>
+          <div class="dialog-body">
+            <div class="dialog-message">${msg}</div>
+            <div class="dialog-sub">${sub}</div>
+            <button class="dialog-btn ${btnClass}">${btnText}</button>
+          </div>
+        </div>
+      `;
+      container.appendChild(overlay);
+      overlay.querySelector(".dialog-btn").onclick = () => overlay.remove();
+    }
+
+    window.logout = async function() {
+      if (unsubscribeCoins) unsubscribeCoins();
+      if (supportUnsubscribe) supportUnsubscribe();
+      await auth.signOut();
+      location.href = 'login.html';
+    };
+
+    window.toggleDropdown = function(e) {
+      e.stopPropagation();
+      const dd = document.getElementById("userDropdown");
+      dd.style.display = dd.style.display === "block" ? "none" : "block";
+    };
+
+    window.closeAllDropdowns = function(e) {
+      const userInfo = document.getElementById("userInfo");
+      if (userInfo && !userInfo.contains(e.target)) {
+        const dd = document.getElementById("userDropdown");
+        if (dd) dd.style.display = "none";
+      }
+    };
+
+    // ==================== SUPPORT CHAT FUNCTIONS ====================
+    async function getUsername(uid) {
+      try {
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        return userSnap.exists()
+          ? (userSnap.data().displayName || userSnap.data().username || "Unknown User")
+          : "Unknown User";
+      } catch (err) {
+        console.error(err);
+        return "Unknown User";
+      }
+    }
+
+    window.openSupport = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login first.");
+        return;
+      }
+
+      const existing = document.getElementById("supportOverlay");
+      if (existing) {
+        existing.remove();
+        if (supportUnsubscribe) {
+          supportUnsubscribe();
+          supportUnsubscribe = null;
+        }
+      }
+
+      const overlay = document.createElement("div");
+      overlay.id = "supportOverlay";
+      overlay.className = "dialog-overlay support-overlay show";
+      overlay.innerHTML = `
+        <div class="support-dialog-box">
+          <div class="support-dialog-inner">
+            <!-- Header -->
+            <div class="support-header-new">
+              <button class="support-back-btn" onclick="closeSupport()" aria-label="Close support">✕</button>
+              <div class="support-header-info">
+                <div class="support-title-new">💬 Support Chat</div>
+                <div class="support-sub-new">We typically reply within a few hours</div>
+              </div>
+            </div>
+
+            <!-- Input Area - AT TOP -->
+            <div class="support-input-area-new">
+              <input type="text" id="supportInput" placeholder="Type your message..." maxlength="1000" autocomplete="off">
+              <button class="support-send-btn" id="supportSendBtn" onclick="sendSupportMsg()" aria-label="Send message">➤</button>
+            </div>
+
+            <!-- Messages Area - BELOW INPUT -->
+            <div class="support-messages-new" id="supportMessages">
+              <div class="support-empty-new">
+                <div class="empty-icon">💬</div>
+                Loading messages...
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      loadSupportMessages();
+
+      // Focus input after animation
+      setTimeout(() => {
+        const input = document.getElementById('supportInput');
+        if (input) input.focus();
+      }, 500);
+    };
+
+    window.closeSupport = () => {
+      const overlay = document.getElementById("supportOverlay");
+      if (overlay) {
+        overlay.remove();
+        if (supportUnsubscribe) {
+          supportUnsubscribe();
+          supportUnsubscribe = null;
+        }
+      }
+    };
+
+    window.sendSupportMsg = async () => {
+      const input = document.getElementById("supportInput");
+      const sendBtn = document.getElementById("supportSendBtn");
+      const message = input.value.trim();
+
+      if (!message) {
+        input.style.borderColor = '#ef4444';
+        input.placeholder = 'Please enter a message...';
+        setTimeout(() => {
+          input.style.borderColor = 'rgba(255,255,255,0.08)';
+          input.placeholder = 'Type your message...';
+        }, 2000);
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = '⏳';
+
+      try {
+        await addDoc(collection(db, "support_messages"), {
+          uid: currentUser.uid,
+          username: await getUsername(currentUser.uid),
+          role: "user",
+          message: message,
+          createdAt: serverTimestamp()
+        });
+
+        input.value = "";
+        const container = document.getElementById("supportMessages");
+        if (container) {
+          setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+          }, 100);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to send message.");
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = '➤';
+        if (input) input.focus();
+      }
+    };
+
+    function loadSupportMessages() {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const container = document.getElementById("supportMessages");
+      if (!container) return;
+
+      container.innerHTML = '<div class="support-empty-new"><div class="empty-icon">⏳</div>Loading messages...</div>';
+
+      if (supportUnsubscribe) {
+        supportUnsubscribe();
+        supportUnsubscribe = null;
+      }
+
+      const q = query(collection(db, "support_messages"), where("uid", "==", user.uid));
+      supportUnsubscribe = onSnapshot(q, (snap) => {
+        if (snap.empty) {
+          container.innerHTML = `
+            <div class="support-empty-new">
+              <div class="empty-icon">💬</div>
+              No messages yet.<br>Start a conversation!
+            </div>
+          `;
+          return;
+        }
+
+        const messages = [];
+        snap.forEach(docSnap => {
+          messages.push(docSnap.data());
+        });
+
+        messages.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+        container.innerHTML = messages.map(msg => {
+          const isAdmin = msg.role === 'admin';
+          return `
+            <div class="support-msg-new ${isAdmin ? 'admin' : 'user'}">
+              ${isAdmin ? '<div class="msg-label">Admin</div>' : ''}
+              <div class="msg-bubble">${msg.message}</div>
+            </div>
+          `;
+        }).join("");
+
+        container.scrollTop = container.scrollHeight;
+      }, (err) => {
+        console.error(err);
+        container.innerHTML = "<div class='support-empty-new' style='color:#ef4444;'>⚠️ Failed to load messages.</div>";
+      });
+    }
+
+    // Enter key to send
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && document.getElementById('supportOverlay')) {
+        const input = document.getElementById('supportInput');
+        if (input && document.activeElement === input) {
+          e.preventDefault();
+          sendSupportMsg();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
