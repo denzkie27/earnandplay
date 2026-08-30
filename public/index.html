@@ -28,6 +28,16 @@
             width: 100%;
             border: 3px solid #f1c40f;
             position: relative;
+            transition: box-shadow 0.3s, border-color 0.3s;
+        }
+        /* Win animation for game container */
+        .game-container.win-animation {
+            animation: containerWin 0.6s ease-in-out 3;
+        }
+        @keyframes containerWin {
+            0% { box-shadow: 0 15px 35px rgba(0,0,0,0.8); border-color: #f1c40f; }
+            50% { box-shadow: 0 0 30px #f1c40f; border-color: #fff; }
+            100% { box-shadow: 0 15px 35px rgba(0,0,0,0.8); border-color: #f1c40f; }
         }
         h1 {
             margin-top: 0;
@@ -108,7 +118,7 @@
             from { box-shadow: 0 0 8px #f1c40f; }
             to { box-shadow: 0 0 25px #f39c12; }
         }
-        /* Reel bounce on stop (extra bounce after overshoot) */
+        /* Reel bounce on stop */
         .reel-column.bounce {
             animation: bounce 0.3s ease-in-out;
         }
@@ -205,10 +215,31 @@
             opacity: 1;
             background: #555;
         }
+        /* WIN overlay banner */
+        .win-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0,0,0,0.8);
+            color: #f1c40f;
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-size: 3em;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            animation: popIn 0.5s forwards;
+        }
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            70% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-container" id="gameContainer">
         <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
         <h1>🎰 SCATTER SLOTS</h1>
         <div class="balance" id="balance">💰 Balance: $<span id="balanceValue">0</span></div>
@@ -221,6 +252,8 @@
         <div class="message" id="message"></div>
         <div class="free-spins-msg" id="freeSpinsMsg"></div>
         <div class="scatter-info">⭐ = Scatter | 3⭐ = 5x + 5 spins | 4⭐ = 10x + 10 spins | 5⭐ = 50x + 20 spins | 6⭐ = 100x + 30 spins | 7⭐ = 200x + 50 spins</div>
+        <!-- Win overlay element -->
+        <div class="win-overlay" id="winOverlay"></div>
     </div>
     <div id="confetti-container"></div>
 
@@ -241,12 +274,13 @@
             { icon: 'music_note',color: '#e91e63' }
         ];
         const SCATTER_ICON = 'star';
-        const CELL_HEIGHT = 120;          // px
+        const CELL_HEIGHT = 120;
         const VISIBLE_ROWS = 3;
         const REEL_COUNT = 5;
-        const STRIP_LENGTH = 60;          // Increased for smoother spin (was 30)
+        const STRIP_LENGTH = 60;
 
         // DOM elements
+        const gameContainer = document.getElementById('gameContainer');
         const balanceSpan = document.getElementById('balance');
         const balanceValueSpan = document.getElementById('balanceValue');
         const betInput = document.getElementById('bet');
@@ -256,11 +290,12 @@
         const reelsContainer = document.getElementById('reelsContainer');
         const confettiContainer = document.getElementById('confetti-container');
         const musicBtn = document.getElementById('musicBtn');
+        const winOverlay = document.getElementById('winOverlay');
 
         const reelStrips = [];
         const reelColumns = [];
 
-        // ===================== AUDIO SYSTEM (Web Audio API) =====================
+        // ===================== AUDIO SYSTEM =====================
         let audioContext = null;
         let musicGainNode = null;
         let musicPlaying = false;
@@ -269,24 +304,23 @@
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 musicGainNode = audioContext.createGain();
-                musicGainNode.gain.value = 0.15; // background music volume
+                musicGainNode.gain.value = 0.15;
                 musicGainNode.connect(audioContext.destination);
             }
         }
 
-        // ----- Sound Effects -----
-        function playTone(frequency, duration, type = 'sine', volume = 0.3) {
+        function playTone(frequency, duration, type = 'sine', volume = 0.3, when = 0) {
             initAudio();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             oscillator.type = type;
             oscillator.frequency.value = frequency;
             gainNode.gain.value = volume;
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration + when);
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + duration);
+            oscillator.start(audioContext.currentTime + when);
+            oscillator.stop(audioContext.currentTime + duration + when);
         }
 
         function playSpinSound() {
@@ -298,10 +332,12 @@
             playTone(800, 0.05, 'square', 0.2);
         }
 
+        // Enhanced win sound: a quick ascending arpeggio
         function playWinSound() {
-            playTone(523, 0.1, 'sine', 0.3);
-            setTimeout(() => playTone(659, 0.1, 'sine', 0.3), 100);
-            setTimeout(() => playTone(784, 0.15, 'sine', 0.3), 200);
+            const notes = [523, 659, 784, 1046];
+            notes.forEach((freq, i) => {
+                playTone(freq, 0.15, 'sine', 0.3, i * 0.1);
+            });
         }
 
         function playFreeSpinsSound() {
@@ -310,12 +346,12 @@
             setTimeout(() => playTone(600, 0.2, 'triangle', 0.3), 300);
         }
 
-        // ----- Background Music Loop (casino-style arpeggio) -----
+        // ----- Background Music Loop -----
         function startMusic() {
             initAudio();
             if (musicPlaying) return;
             musicPlaying = true;
-            const notes = [261.63, 329.63, 392.00, 523.25]; // C, E, G, C
+            const notes = [261.63, 329.63, 392.00, 523.25];
             let noteIndex = 0;
             function scheduleNextNote() {
                 if (!musicPlaying) return;
@@ -331,7 +367,6 @@
                 osc.start(now);
                 osc.stop(now + 0.8);
                 noteIndex++;
-                // Schedule next note after 0.4s
                 setTimeout(scheduleNextNote, 400);
             }
             scheduleNextNote();
@@ -397,9 +432,8 @@
         // ===================== REEL PREPARATION =====================
         function prepareStrip(strip, finalColumnSymbols) {
             strip.innerHTML = '';
-            // We choose a random index such that there are enough cells above and below
-            const minIndex = 2; // need at least 2 above for possible overshoot
-            const maxIndex = STRIP_LENGTH - VISIBLE_ROWS - 2; // and 2 below
+            const minIndex = 2;
+            const maxIndex = STRIP_LENGTH - VISIBLE_ROWS - 2;
             const idx = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
             for (let i = 0; i < STRIP_LENGTH; i++) {
                 const cell = document.createElement('div');
@@ -417,8 +451,6 @@
                 cell.appendChild(iconSpan);
                 strip.appendChild(cell);
             }
-            // The middle visible row is at index idx
-            // The top of the visible area corresponds to translateY = -(idx - 1) * CELL_HEIGHT
             return -(idx - 1) * CELL_HEIGHT;
         }
 
@@ -450,6 +482,18 @@
                 confettiContainer.appendChild(confetti);
                 setTimeout(() => confetti.remove(), 3000);
             }
+        }
+
+        // ===================== WIN OVERLAY =====================
+        function showWinOverlay(amount) {
+            winOverlay.textContent = `WIN $${amount}!`;
+            winOverlay.style.animation = 'none';
+            void winOverlay.offsetHeight; // reflow
+            winOverlay.style.animation = 'popIn 0.5s forwards';
+            setTimeout(() => {
+                winOverlay.style.animation = '';
+                winOverlay.textContent = '';
+            }, 2000);
         }
 
         // ===================== SPIN LOGIC =====================
@@ -490,29 +534,21 @@
                 }
 
                 // ----- REALISTIC ANIMATION WITH OVERSHOOT -----
-                // First, set initial position (way up)
                 reelStrips.forEach((strip, col) => {
                     strip.style.transition = 'none';
                     strip.style.transform = `translateY(-${STRIP_LENGTH * CELL_HEIGHT}px)`;
-                    void strip.offsetHeight; // reflow
+                    void strip.offsetHeight;
                 });
 
-                // Determine overshoot: e.g., overshoot by 10px beyond final
-                const overshoot = 10; // px
-
-                // For each reel, animate to final + overshoot first, then after a short delay, settle to final
+                const overshoot = 10;
                 reelStrips.forEach((strip, col) => {
-                    const delay = col * 0.15; // seconds
-                    const duration = 1.2; // seconds for main spin
-                    const settleDuration = 0.2; // seconds for settle
+                    const delay = col * 0.15;
+                    const duration = 1.2;
+                    const settleDuration = 0.2;
                     const finalY = finalTranslateYs[col];
                     const overshootY = finalY + overshoot;
-
-                    // Main spin to overshoot position
                     strip.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.15, 1) ${delay}s`;
                     strip.style.transform = `translateY(${overshootY}px)`;
-
-                    // After main spin, settle to final
                     const settleStart = (duration + delay) * 1000;
                     setTimeout(() => {
                         strip.style.transition = `transform ${settleDuration}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
@@ -520,9 +556,8 @@
                     }, settleStart);
                 });
 
-                // Sound for each reel stop (trigger at overshoot time)
                 for (let col = 0; col < REEL_COUNT; col++) {
-                    const stopDelay = (1.2 + col * 0.15) * 1000; // ms
+                    const stopDelay = (1.2 + col * 0.15) * 1000;
                     setTimeout(() => {
                         playReelStop();
                         reelColumns[col].classList.add('bounce');
@@ -530,17 +565,22 @@
                     }, stopDelay);
                 }
 
-                // Process win after all reels have settled
-                const maxEndTime = 1.2 + (REEL_COUNT - 1) * 0.15 + 0.2; // main + last delay + settle
+                const maxEndTime = 1.2 + (REEL_COUNT - 1) * 0.15 + 0.2;
                 setTimeout(() => {
-                    // Remove transition for safety
                     reelStrips.forEach(strip => strip.style.transition = 'none');
                     if (data.scatters >= 3) {
+                        // Highlight winning scatters
                         highlightScatters(finalGrid, finalTranslateYs);
+                        // Play win sound
                         playWinSound();
-                        if (data.scatters >= 5) {
-                            spawnConfetti(100);
-                        }
+                        // Show win overlay
+                        showWinOverlay(data.winAmount);
+                        // Add container animation
+                        gameContainer.classList.add('win-animation');
+                        setTimeout(() => gameContainer.classList.remove('win-animation'), 1800);
+                        // Spawn confetti (more for bigger wins)
+                        const confettiCount = data.scatters >= 5 ? 100 : 50;
+                        spawnConfetti(confettiCount);
                     }
                     let msg = "";
                     if (data.scatters >= 3) {
