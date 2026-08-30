@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="fonts-loaded">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -101,7 +101,8 @@
             transform: scale(1.05);
             border-color: rgba(255, 255, 255, .15);
         }
-        .header-icon-btn .nx-icon {
+        /* Styling for Material Icons inside header buttons */
+        .header-icon-btn .material-icons {
             font-size: 22px;
             opacity: .85;
         }
@@ -197,6 +198,10 @@
         .user-dropdown a:hover {
             background: rgba(255, 255, 255, .06);
             color: #fff;
+        }
+        .user-dropdown .material-icons {
+            font-size: 18px;
+            opacity: .6;
         }
         .user-dropdown .logout-opt {
             border-top: 1px solid rgba(255, 255, 255, .06);
@@ -524,20 +529,15 @@
         .coin-svg { width: 20px; height: 20px; display: inline-block; flex-shrink: 0; }
         .coin-svg-big { width: 32px; height: 32px; }
         .coin-svg-small { width: 14px; height: 14px; }
-
-        /* ========== ICON FIX ========== */
-        .nx-icon {
-            color: inherit;  /* Changed from transparent to inherit */
-        }
     </style>
 </head>
 <body>
 
-    <!-- ========== HEADER (same as earn page) ========== -->
+    <!-- ========== HEADER (same as earn page, but using Material Icons) ========== -->
     <header class="nf-header">
         <div class="header-left">
-            <button class="header-icon-btn" onclick="history.back()"><span class="nx-icon">arrow_back</span></button>
-            <a href="index.html" class="header-icon-btn"><span class="nx-icon">home</span></a>
+            <button class="header-icon-btn" onclick="history.back()"><span class="material-icons">arrow_back</span></button>
+            <a href="index.html" class="header-icon-btn"><span class="material-icons">home</span></a>
         </div>
         <div class="coins-box">
             <div class="coins">
@@ -550,13 +550,13 @@
             </div>
             <a href="earn.html" class="earn-btn">Earn Coins</a>
             <div class="user-info" id="userInfo" style="display:none;" onclick="toggleDropdown(event)">
-                <span class="nx-icon">account_circle</span>
-                <span class="nx-icon" style="opacity:.5;">expand_more</span>
+                <span class="material-icons">account_circle</span>
+                <span class="material-icons" style="opacity:.5;">expand_more</span>
                 <div class="user-dropdown" id="userDropdown">
-                    <a onclick="event.stopPropagation(); location.href='profile.html'"><span class="nx-icon">person</span> My Profile</a>
-                    <a onclick="event.stopPropagation(); location.href='watchlist.html'"><span class="nx-icon">bookmark</span> Watchlist</a>
-                    <a onclick="event.stopPropagation(); location.href='settings.html'"><span class="nx-icon">settings</span> Settings</a>
-                    <a class="logout-opt" id="logoutLink" onclick="event.stopPropagation(); logout()"><span class="nx-icon">logout</span> Sign Out</a>
+                    <a onclick="event.stopPropagation(); location.href='profile.html'"><span class="material-icons">person</span> My Profile</a>
+                    <a onclick="event.stopPropagation(); location.href='watchlist.html'"><span class="material-icons">bookmark</span> Watchlist</a>
+                    <a onclick="event.stopPropagation(); location.href='settings.html'"><span class="material-icons">settings</span> Settings</a>
+                    <a class="logout-opt" id="logoutLink" onclick="event.stopPropagation(); logout()"><span class="material-icons">logout</span> Sign Out</a>
                 </div>
             </div>
         </div>
@@ -610,18 +610,6 @@
     </div>
 
     <div id="confetti-container"></div>
-
-    <script>
-        // Font loading fix (optional but harmless)
-        document.fonts.ready.then(() => {
-            document.documentElement.classList.add('fonts-loaded');
-        });
-        setTimeout(() => {
-            if (!document.documentElement.classList.contains('fonts-loaded')) {
-                document.documentElement.classList.add('fonts-loaded');
-            }
-        }, 5000);
-    </script>
 
     <script type="module">
         // ===================== FIREBASE =====================
