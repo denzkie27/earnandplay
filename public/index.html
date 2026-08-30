@@ -43,7 +43,6 @@
             pointer-events: none;
             z-index: -1;
         }
-        /* Scrollbar */
         * {
             scrollbar-width: thin;
             scrollbar-color: rgba(229, 9, 20, 0.3) transparent;
@@ -208,7 +207,7 @@
             color: #ff5a5a;
         }
 
-        /* ========== CONTAINER & CARD (similar to earn page) ========== */
+        /* ========== CONTAINER & CARD ========== */
         .container {
             max-width: 750px;
             margin: 0 auto;
@@ -234,8 +233,16 @@
             background: radial-gradient(circle, rgba(255, 0, 60, 0.06), transparent 60%);
             pointer-events: none;
         }
+        .main-card.win-animation {
+            animation: containerWin 0.6s ease-in-out 3;
+        }
+        @keyframes containerWin {
+            0% { box-shadow: 0 20px 60px rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.08); }
+            50% { box-shadow: 0 0 30px #f1c40f; border-color: #fff; }
+            100% { box-shadow: 0 20px 60px rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.08); }
+        }
 
-        /* ========== SLOT SPECIFIC STYLES (adapted) ========== */
+        /* ========== SLOT SPECIFIC STYLES ========== */
         .slot-title {
             text-align: center;
             font-size: 28px;
@@ -552,7 +559,7 @@
 
     <!-- ========== MAIN CONTENT ========== -->
     <div class="container">
-        <div class="main-card">
+        <div class="main-card" id="gameContainer">
             <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
             <div class="slot-title">🎰 SCATTER SLOTS</div>
 
@@ -622,8 +629,9 @@
         const firestore = getFirestore(firebaseApp);
 
         // ===================== DOM ELEMENTS =====================
-        const gameContainer = document.querySelector('.main-card');
+        const gameContainer = document.getElementById('gameContainer');
         const balanceValueSpan = document.getElementById('balanceValue');
+        const balanceSpan = document.getElementById('balance'); // <-- FIX: added missing variable
         const coinsHeaderSpan = document.getElementById('coinsHeader');
         const betInput = document.getElementById('bet');
         const spinBtn = document.getElementById('spinBtn');
@@ -780,12 +788,16 @@
 
         // ===================== STATE & SYNC =====================
         async function fetchState() {
-            const res = await fetch('/api/state');
-            const data = await res.json();
-            balanceValueSpan.textContent = data.balance;
-            coinsHeaderSpan.textContent = data.balance;
-            betInput.max = data.balance;
-            updateFreeSpinsMsg(data.freeSpins);
+            try {
+                const res = await fetch('/api/state');
+                const data = await res.json();
+                balanceValueSpan.textContent = data.balance;
+                coinsHeaderSpan.textContent = data.balance;
+                betInput.max = data.balance;
+                updateFreeSpinsMsg(data.freeSpins);
+            } catch (err) {
+                console.error('Failed to fetch state', err);
+            }
         }
         function updateFreeSpinsMsg(count) {
             freeSpinsMsgDiv.textContent = count>0 ? `🎁 Free spins remaining: ${count}` : "";
@@ -859,7 +871,7 @@
                 balanceValueSpan.textContent = data.newBalance;
                 coinsHeaderSpan.textContent = data.newBalance;
                 betInput.max = data.newBalance;
-                balanceSpan.classList.add('flash'); setTimeout(()=>balanceSpan.classList.remove('flash'),500);
+                balanceSpan.classList.add('flash'); setTimeout(()=>balanceSpan.classList.remove('flash'),500); // <-- now works
                 updateFreeSpinsMsg(data.freeSpinsRemaining);
                 const finalGrid = data.grid;
                 const finalTranslateYs = [];
