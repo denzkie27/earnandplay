@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Account – YOUR TV</title>
+  <style>
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    body{
+      font-family:Arial,sans-serif; min-height:100vh; color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      background:
+        linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.92)),
+        radial-gradient(circle at top, rgba(229,9,20,0.22) 0%, rgba(20,20,20,0.15) 35%, rgba(0,0,0,1) 75%),
+        linear-gradient(to right, #050505, #111, #050505);
+      background-attachment: fixed;
+    }
+    body::before{ content:""; position:fixed; inset:0; background:radial-gradient(circle at top center, rgba(229,9,20,0.16), transparent 55%); pointer-events:none; z-index:-1; }
+    body::after{ content:""; position:fixed; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.75), transparent 30%); pointer-events:none; z-index:-1; }
+
+    /* Header styles */
+    .nf-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 10, 10, .7);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-icon-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      background: rgba(255, 255, 255, .04);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all .2s;
+      text-decoration: none;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, .06);
+    }
+    .header-icon-btn:hover {
+      background: rgba(255, 255, 255, .12);
+      transform: scale(1.05);
+      border-color: rgba(255, 255, 255, .15);
+    }
+    .header-icon-btn .nx-icon {
+      font-size: 22px;
+      opacity: .85;
+    }
+    .play-slots-btn {
+      background: #e67e22;
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .play-slots-btn:hover { background: #f39c12; }
+
+    /* Auth box */
+    .auth-box{ position:relative; width:100%; max-width:420px; background:#151515; border:1px solid rgba(255,255,255,0.08); border-radius:24px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.7); animation:popUp .25s ease; margin-top: 80px; margin-bottom: 20px; }
+    .auth-header{ padding:20px 22px; font-size:22px; font-weight:800; border-bottom:1px solid rgba(255,255,255,0.06); text-align:center; background:linear-gradient(90deg,#ff003c,#ff7a00); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .auth-body{ padding:22px; display:flex; flex-direction:column; gap:14px; }
+    .auth-body input{ width:100%; height:50px; border:none; outline:none; border-radius:14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#fff; font-size:15px; padding:0 18px; transition:.25s; }
+    .auth-body input:focus{ border-color:#ff003c; box-shadow:0 0 0 3px rgba(255,0,60,0.15); }
+    .auth-body input::placeholder{ color:#888; }
+    .auth-submit{ width:100%; height:50px; border:none; border-radius:14px; background:linear-gradient(135deg,#ff003c,#ff7a00); color:#fff; font-weight:bold; font-size:16px; cursor:pointer; transition:.25s; box-shadow:0 5px 18px rgba(255,0,60,0.3); }
+    .auth-submit:hover{ opacity:.9; transform:translateY(-1px); }
+    .auth-submit:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+    .auth-switch{ text-align:center; font-size:13px; color:#aaa; }
+    .auth-switch a{ color:#ff5a6a; cursor:pointer; font-weight:600; text-decoration:none; }
+    .auth-switch a:hover{ text-decoration:underline; }
+    .auth-error{ color:#ff5a5a; font-size:13px; text-align:center; min-height:20px; }
+    .auth-success{ color:#22c55e; font-size:13px; text-align:center; min-height:20px; }
+    .back-home{ margin-top:10px; text-align:center; }
+    .back-home a{ color:#888; font-size:12px; text-decoration:none; }
+    .back-home a:hover{ color:#fff; }
+    @keyframes popUp{ from{ opacity:0; transform:scale(.92); } to{ opacity:1; transform:scale(1); } }
+    
+    .toast{
+      position:fixed;
+      top:20px;
+      right:20px;
+      padding:14px 20px;
+      border-radius:12px;
+      font-weight:600;
+      z-index:99999;
+      animation:slideIn .3s ease;
+      max-width:360px;
+      display:none;
+    }
+    .toast-success{ background:rgba(34,197,94,.9); color:#fff; }
+    .toast-error{ background:rgba(239,68,68,.9); color:#fff; }
+    .toast-info{ background:rgba(52,152,219,.9); color:#fff; }
+    @keyframes slideIn{
+      from{ opacity:0; transform:translateX(30px) }
+      to{ opacity:1; transform:translateX(0) }
+    }
+    
+    .password-strength{
+      height:4px;
+      background:rgba(255,255,255,.06);
+      border-radius:4px;
+      overflow:hidden;
+      margin-top:-8px;
+    }
+    .password-strength .bar{
+      height:100%;
+      width:0%;
+      border-radius:4px;
+      transition: width .3s ease, background-color .3s ease;
+    }
+    .password-strength .bar.weak{ 
+      width:33%; 
+      background:#ef4444; 
+    }
+    .password-strength .bar.medium{ 
+      width:66%; 
+      background:#f59e0b; 
+    }
+    .password-strength .bar.strong{ 
+      width:100%; 
+      background:#22c55e; 
+    }
+
+    @media(max-width: 600px) {
+      .nf-header { padding: 6px 8px; }
+      .auth-box { margin-top: 70px; margin-left: 12px; margin-right: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Integrated header -->
+<header class="nf-header">
+  <div class="header-left">
+    <button class="header-icon-btn" onclick="history.back()">
+      <span class="nx-icon">arrow_back</span>
+    </button>
+    <a href="index.html" class="header-icon-btn">
+      <span class="nx-icon">home</span>
+    </a>
+  </div>
+  <a href="index.html" class="play-slots-btn">🎰 Play Slots</a>
+</header>
+
+<div class="auth-box">
+  <div class="auth-header">🎬 Create Account</div>
+  <div class="auth-body">
+    <input type="text" id="regUsername" placeholder="Username (3+ chars)" autocomplete="username" />
+    <input type="email" id="regEmail" placeholder="Email address" autocomplete="email" />
+    <input type="password" id="regPassword" placeholder="Password (6+ chars)" autocomplete="new-password" />
+    <div class="password-strength" id="passwordStrength">
+      <div class="bar" id="strengthBar"></div>
+    </div>
+    <input type="password" id="regPassword2" placeholder="Confirm password" autocomplete="new-password" />
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;cursor:pointer;user-select:none;">
+      <input type="checkbox" id="showPassword" style="width:16px;height:16px;accent-color:#ff003c;">
+      Show password
+    </label>
+    <div class="auth-error" id="registerError"></div>
+    <div class="auth-success" id="registerSuccess"></div>
+    <button class="auth-submit" id="registerBtn">Create Account</button>
+    <div class="auth-switch">
+      Already have an account? <a href="login.html">Sign in</a>
+    </div>
+    <div class="back-home"><a href="index.html">← Back to Home</a></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
+    authDomain: "yourtv-c12eb.firebaseapp.com",
+    projectId: "yourtv-c12eb",
+    storageBucket: "yourtv-c12eb.firebasestorage.app",
+    messagingSenderId: "28690991912",
+    appId: "1:28690991912:web:aced74eff2ddd5eaaede1d",
+    measurementId: "G-S28R0XLW60"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // ========== UI Elements ==========
+  const usernameEl = document.getElementById('regUsername');
+  const emailEl    = document.getElementById('regEmail');
+  const passEl     = document.getElementById('regPassword');
+  const pass2El    = document.getElementById('regPassword2');
+  const errorEl    = document.getElementById('registerError');
+  const successEl  = document.getElementById('registerSuccess');
+  const registerBtn = document.getElementById('registerBtn');
+  const showPassword = document.getElementById('showPassword');
+  const strengthBar = document.getElementById('strengthBar');
+  const toast = document.getElementById('toast');
+
+  function showToast(message, type = 'success') {
+    toast.textContent = message;
+    toast.className = `toast toast-${type}`;
+    toast.style.display = 'block';
+    clearTimeout(toast._timeout);
+    toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 4000);
+  }
+
+  // Password strength (unchanged)
+  passEl.addEventListener('input', function() {
+    const password = this.value;
+    strengthBar.className = 'bar';
+    if (password.length === 0) return;
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.length >= 10) strength++;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+    if (/\d/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    let strengthLevel;
+    if (strength <= 1) strengthLevel = 'weak';
+    else if (strength <= 3) strengthLevel = 'medium';
+    else strengthLevel = 'strong';
+    strengthBar.className = `bar ${strengthLevel}`;
+  });
+  passEl.addEventListener('change', function() { if (this.value.length === 0) strengthBar.className = 'bar'; });
+
+  showPassword.addEventListener('change', () => {
+    const type = showPassword.checked ? 'text' : 'password';
+    passEl.type = type;
+    pass2El.type = type;
+  });
+
+  async function handleRegister() {
+    const username = usernameEl.value.trim();
+    const email    = emailEl.value.trim();
+    const pass     = passEl.value;
+    const pass2    = pass2El.value;
+
+    errorEl.innerText = '';
+    successEl.innerText = '';
+
+    if (!username || username.length < 3) { errorEl.innerText = 'Username must be at least 3 characters.'; usernameEl.focus(); return; }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) { errorEl.innerText = 'Letters, numbers, underscores only.'; usernameEl.focus(); return; }
+    if (!email || !email.includes('@')) { errorEl.innerText = 'Enter a valid email address.'; emailEl.focus(); return; }
+    if (pass.length < 6) { errorEl.innerText = 'Password must be at least 6 characters.'; passEl.focus(); return; }
+    if (pass !== pass2) { errorEl.innerText = 'Passwords do not match.'; pass2El.focus(); return; }
+
+    registerBtn.disabled = true;
+    registerBtn.innerText = 'Creating account...';
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: username });
+
+      // ✅ Store username + email in sessionStorage so other pages can use them
+      sessionStorage.setItem('new_signup', JSON.stringify({ username, email }));
+
+      successEl.innerText = '✅ Account created! Setting up your wallet...';
+      showToast('Welcome! You will receive 100 coins.', 'success');
+
+      // Redirect to earn page (or index) after short delay
+      setTimeout(() => {
+        window.location.href = 'earn.html';
+      }, 1500);
+
+    } catch (error) {
+      console.error(error);
+      let msg = error.message || 'Something went wrong.';
+      if (error.code === 'auth/email-already-in-use') msg = 'Email already registered.';
+      else if (error.code === 'auth/weak-password') msg = 'Password too weak.';
+      errorEl.innerText = msg;
+      showToast(msg, 'error');
+      registerBtn.disabled = false;
+      registerBtn.innerText = 'Create Account';
+    }
+  }
+
+  registerBtn.addEventListener('click', handleRegister);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleRegister(); });
+
+  // Password match validation
+  function validatePasswordMatch() {
+    if (passEl.value && pass2El.value) {
+      if (passEl.value !== pass2El.value) {
+        pass2El.style.borderColor = '#ef4444';
+        errorEl.innerText = 'Passwords do not match';
+      } else {
+        pass2El.style.borderColor = '#22c55e';
+        if (errorEl.innerText === 'Passwords do not match') errorEl.innerText = '';
+      }
+    } else if (pass2El.value && !passEl.value) {
+      pass2El.style.borderColor = '#ef4444';
+      errorEl.innerText = 'Please enter password first';
+    } else {
+      pass2El.style.borderColor = 'rgba(255,255,255,0.08)';
+      if (errorEl.innerText === 'Passwords do not match' || errorEl.innerText === 'Please enter password first') errorEl.innerText = '';
+    }
+  }
+  pass2El.addEventListener('input', validatePasswordMatch);
+  passEl.addEventListener('input', validatePasswordMatch);
+
+  // If already logged in, go to home
+  if (auth.currentUser) {
+    window.location.href = 'index.html';
+  }
+</script>
+</body>
+</html>
