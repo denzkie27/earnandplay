@@ -4,52 +4,251 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scatter Slot – Coins Edition</title>
+    <!-- Google Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        /* Keep all existing styles exactly the same */
-        * { box-sizing: border-box; }
+        /* ========== GLOBAL STYLES (same as earn page) ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Arial', sans-serif;
-            background: radial-gradient(circle at center, #2c3e50, #1a252f);
+            font-family: Arial, sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0.45),
+                rgba(0, 0, 0, 0.92)
+            ),
+            radial-gradient(circle at top, rgba(229, 9, 20, 0.22) 0%, rgba(20, 20, 20, 0.15) 35%, rgba(0, 0, 0, 1) 75%),
+            linear-gradient(to right, #050505, #111, #050505);
+            background-attachment: scroll;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top center, rgba(229, 9, 20, 0.16), transparent 55%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent 30%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        /* Scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(229, 9, 20, 0.3) transparent;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; border-radius: 10px; margin: 4px; }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(229, 9, 20, 0.4), rgba(255, 122, 0, 0.4));
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(229, 9, 20, 0.7), rgba(255, 122, 0, 0.7));
+        }
+
+        /* ========== HEADER (same as earn page) ========== */
+        .nf-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, .7);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header-icon-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            background: rgba(255, 255, 255, .04);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all .2s;
+            text-decoration: none;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, .06);
+        }
+        .header-icon-btn:hover {
+            background: rgba(255, 255, 255, .12);
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, .15);
+        }
+        .header-icon-btn .nx-icon {
+            font-size: 22px;
+            opacity: .85;
+        }
+        .coins-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .coins {
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .08);
+            padding: 7px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .coin-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+        .earn-btn {
+            border: none;
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 12px;
+            font-family: inherit;
+            transition: .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: .01em;
+            background: #e50914;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(229, 9, 20, .3);
+            text-decoration: none;
+        }
+        .earn-btn:hover {
+            background: #f40612;
+            transform: scale(1.03);
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .08);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: .2s;
+            position: relative;
+        }
+        .user-info:hover {
+            background: rgba(255, 255, 255, .1);
+        }
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 6px;
+            background: #1a1a1a;
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 14px;
+            overflow: hidden;
+            min-width: 180px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, .6);
+            display: none;
+            z-index: 99999;
+            padding: 4px 0;
+        }
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: rgba(255, 255, 255, .75);
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: .15s;
+            cursor: pointer;
+        }
+        .user-dropdown a:hover {
+            background: rgba(255, 255, 255, .06);
+            color: #fff;
+        }
+        .user-dropdown .logout-opt {
+            border-top: 1px solid rgba(255, 255, 255, .06);
+            color: #ff5a5a;
+        }
+        .user-dropdown .logout-opt:hover {
+            background: rgba(255, 90, 90, .08);
+            color: #ff5a5a;
+        }
+
+        /* ========== CONTAINER & CARD (similar to earn page) ========== */
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            padding: 30px 16px 40px;
+        }
+        .main-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
+            padding: 30px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            position: relative;
             overflow: hidden;
         }
-        .game-container {
-            background: #1e272e;
-            padding: 20px 25px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+        .main-card::before {
+            content: "";
+            position: absolute;
+            top: -60%;
+            left: -30%;
+            width: 160%;
+            height: 160%;
+            background: radial-gradient(circle, rgba(255, 0, 60, 0.06), transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ========== SLOT SPECIFIC STYLES (adapted) ========== */
+        .slot-title {
             text-align: center;
-            color: #fff;
-            max-width: 750px;
-            width: 100%;
-            border: 3px solid #f1c40f;
-            position: relative;
-            transition: box-shadow 0.3s, border-color 0.3s;
-        }
-        .game-container.win-animation {
-            animation: containerWin 0.6s ease-in-out 3;
-        }
-        @keyframes containerWin {
-            0% { box-shadow: 0 15px 35px rgba(0,0,0,0.8); border-color: #f1c40f; }
-            50% { box-shadow: 0 0 30px #f1c40f; border-color: #fff; }
-            100% { box-shadow: 0 15px 35px rgba(0,0,0,0.8); border-color: #f1c40f; }
-        }
-        h1 {
-            margin-top: 0;
-            font-size: 2.2em;
-            letter-spacing: 2px;
-            color: #f1c40f;
-            text-shadow: 2px 2px 0 #e67e22;
-            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            background: linear-gradient(90deg, #fff, #f9a8d4, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .balance {
-            font-size: 1.4em;
-            margin: 5px 0;
+            font-size: 1.2em;
+            margin: 5px 0 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -63,17 +262,17 @@
             margin: 15px 0;
         }
         .bet-control label {
-            font-size: 1.2em;
+            font-size: 1.1em;
             display: flex;
             align-items: center;
             gap: 5px;
         }
         .bet-control input {
-            width: 80px;
+            width: 70px;
             padding: 10px;
-            font-size: 1.2em;
+            font-size: 1.1em;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             text-align: center;
             background: #fff;
             color: #333;
@@ -82,17 +281,17 @@
         .reels-container {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             margin: 20px 0;
             background: #0f151a;
-            padding: 15px;
+            padding: 12px;
             border-radius: 15px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
             position: relative;
         }
         .reel-column {
-            width: 120px;
-            height: 360px;
+            width: 100px;
+            height: 300px;
             overflow: hidden;
             position: relative;
             border-radius: 8px;
@@ -106,7 +305,7 @@
             width: 100%;
         }
         .reel-cell {
-            height: 120px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -115,7 +314,7 @@
             user-select: none;
         }
         .reel-cell .material-icons {
-            font-size: 70px;
+            font-size: 60px;
             color: inherit;
         }
         .reel-cell.win {
@@ -135,11 +334,19 @@
             60% { transform: translateY(4px); }
             100% { transform: translateY(0); }
         }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
         .spin-btn {
             background: #e67e22;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.6em;
+            padding: 12px 25px;
+            font-size: 1.4em;
             font-weight: bold;
             border-radius: 40px;
             cursor: pointer;
@@ -159,8 +366,8 @@
         .auto-spin-btn, .stop-btn {
             background: #3498db;
             border: none;
-            padding: 12px 25px;
-            font-size: 1.2em;
+            padding: 10px 20px;
+            font-size: 1.1em;
             font-weight: bold;
             border-radius: 30px;
             cursor: pointer;
@@ -183,14 +390,6 @@
             text-shadow: 1px 1px 0 #922b21;
         }
         .stop-btn:hover { background: #c0392b; }
-        .button-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-            align-items: center;
-        }
         .auto-spin-count {
             display: flex;
             align-items: center;
@@ -209,19 +408,19 @@
             font-weight: bold;
         }
         .message {
-            min-height: 50px;
-            font-size: 1.5em;
+            min-height: 40px;
+            font-size: 1.2em;
             margin: 15px 0;
             font-weight: bold;
             color: #fff;
         }
         .free-spins-msg {
             color: #2ecc71;
-            font-size: 1.2em;
-            min-height: 30px;
+            font-size: 1.1em;
+            min-height: 25px;
         }
         .scatter-info {
-            font-size: 0.95em;
+            font-size: 0.9em;
             color: #bbb;
             margin: 10px 0;
         }
@@ -315,71 +514,98 @@
             80% { transform: translate(-50%, -50%) scale(1.1); }
             100% { transform: translate(-50%, -50%) scale(1); }
         }
-
-        /* Coin SVG styling */
-        .coin-svg {
-            width: 20px;
-            height: 20px;
-            display: inline-block;
-            flex-shrink: 0;
-        }
-        .coin-svg-big {
-            width: 32px;
-            height: 32px;
-        }
-        .coin-svg-small {
-            width: 14px;
-            height: 14px;
-        }
+        .coin-svg { width: 20px; height: 20px; display: inline-block; flex-shrink: 0; }
+        .coin-svg-big { width: 32px; height: 32px; }
+        .coin-svg-small { width: 14px; height: 14px; }
     </style>
 </head>
 <body>
-    <div class="game-container" id="gameContainer">
-        <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
-        <h1>🎰 SCATTER SLOTS</h1>
-        <div class="balance" id="balance">
-            <span>💰 Balance:</span>
-            <!-- Coin SVG -->
-            <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
-                <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
-                <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
-            </svg>
-            <span id="balanceValue">0</span>
+
+    <!-- ========== HEADER (same as earn page) ========== -->
+    <header class="nf-header">
+        <div class="header-left">
+            <button class="header-icon-btn" onclick="history.back()"><span class="nx-icon">arrow_back</span></button>
+            <a href="index.html" class="header-icon-btn"><span class="nx-icon">home</span></a>
         </div>
-        <div class="bet-control">
-            <label for="bet">
-                <span>Bet:</span>
+        <div class="coins-box">
+            <div class="coins">
+                <svg class="coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+                </svg>
+                <span id="coinsHeader">0</span>
+            </div>
+            <a href="earn.html" class="earn-btn">Earn Coins</a>
+            <div class="user-info" id="userInfo" style="display:none;" onclick="toggleDropdown(event)">
+                <span class="nx-icon">account_circle</span>
+                <span class="nx-icon" style="opacity:.5;">expand_more</span>
+                <div class="user-dropdown" id="userDropdown">
+                    <a onclick="event.stopPropagation(); location.href='profile.html'"><span class="nx-icon">person</span> My Profile</a>
+                    <a onclick="event.stopPropagation(); location.href='watchlist.html'"><span class="nx-icon">bookmark</span> Watchlist</a>
+                    <a onclick="event.stopPropagation(); location.href='settings.html'"><span class="nx-icon">settings</span> Settings</a>
+                    <a class="logout-opt" id="logoutLink" onclick="event.stopPropagation(); logout()"><span class="nx-icon">logout</span> Sign Out</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="container">
+        <div class="main-card">
+            <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
+            <div class="slot-title">🎰 SCATTER SLOTS</div>
+
+            <div class="balance" id="balance">
+                <span>💰 Balance:</span>
                 <!-- Coin SVG -->
                 <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
                     <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
                     <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
                 </svg>
-            </label>
-            <input type="number" id="bet" value="1" min="1" max="100">
-        </div>
-        <div class="reels-container" id="reelsContainer"></div>
-        <div class="button-row">
-            <button class="spin-btn" id="spinBtn">SPIN</button>
-            <div class="auto-spin-count">
-                <label for="autoSpinCount">Times:</label>
-                <input type="number" id="autoSpinCount" value="5" min="1" max="100" step="1">
+                <span id="balanceValue">0</span>
             </div>
-            <button class="auto-spin-btn" id="autoSpinBtn">AUTO SPIN</button>
-            <button class="stop-btn" id="stopBtn" disabled>STOP</button>
+
+            <div class="bet-control">
+                <label for="bet">
+                    <span>Bet:</span>
+                    <!-- Coin SVG -->
+                    <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+                        <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+                    </svg>
+                </label>
+                <input type="number" id="bet" value="1" min="1" max="100">
+            </div>
+
+            <div class="reels-container" id="reelsContainer"></div>
+
+            <div class="button-row">
+                <button class="spin-btn" id="spinBtn">SPIN</button>
+                <div class="auto-spin-count">
+                    <label for="autoSpinCount">Times:</label>
+                    <input type="number" id="autoSpinCount" value="5" min="1" max="100" step="1">
+                </div>
+                <button class="auto-spin-btn" id="autoSpinBtn">AUTO SPIN</button>
+                <button class="stop-btn" id="stopBtn" disabled>STOP</button>
+            </div>
+
+            <div class="message" id="message"></div>
+            <div class="free-spins-msg" id="freeSpinsMsg"></div>
+            <div class="scatter-info">⭐ = Scatter | 3⭐ = 2x + 2 spins | 4⭐ = 5x + 4 spins | 5⭐ = 10x + 8 spins | 6⭐ = 20x + 12 spins | 7⭐ = 50x + 20 spins</div>
+            <div class="win-overlay" id="winOverlay"></div>
         </div>
-        <div class="message" id="message"></div>
-        <div class="free-spins-msg" id="freeSpinsMsg"></div>
-        <div class="scatter-info">⭐ = Scatter | 3⭐ = 2x + 2 spins | 4⭐ = 5x + 4 spins | 5⭐ = 10x + 8 spins | 6⭐ = 20x + 12 spins | 7⭐ = 50x + 20 spins</div>
-        <div class="win-overlay" id="winOverlay"></div>
     </div>
+
     <div id="confetti-container"></div>
 
+    <!-- ========== JAVASCRIPT (slot logic + Firebase sync + header auth) ========== -->
     <script type="module">
-        // ===================== FIREBASE (ADDED FOR BALANCE SYNC) =====================
+        // ===================== FIREBASE =====================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -391,12 +617,32 @@
             appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
             measurementId: "G-CC7DLZS0NB"
         };
-
         const firebaseApp = initializeApp(firebaseConfig);
         const firebaseAuth = getAuth(firebaseApp);
         const firestore = getFirestore(firebaseApp);
 
-        // ===================== GAME CONFIGURATION =====================
+        // ===================== DOM ELEMENTS =====================
+        const gameContainer = document.querySelector('.main-card');
+        const balanceValueSpan = document.getElementById('balanceValue');
+        const coinsHeaderSpan = document.getElementById('coinsHeader');
+        const betInput = document.getElementById('bet');
+        const spinBtn = document.getElementById('spinBtn');
+        const autoSpinBtn = document.getElementById('autoSpinBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const autoSpinCountInput = document.getElementById('autoSpinCount');
+        const messageDiv = document.getElementById('message');
+        const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
+        const reelsContainer = document.getElementById('reelsContainer');
+        const confettiContainer = document.getElementById('confetti-container');
+        const musicBtn = document.getElementById('musicBtn');
+        const winOverlay = document.getElementById('winOverlay');
+        const userInfo = document.getElementById('userInfo');
+        const userDropdown = document.getElementById('userDropdown');
+
+        const reelStrips = [];
+        const reelColumns = [];
+
+        // ===================== GAME CONFIG =====================
         const SYMBOLS = [
             { icon: 'star',      color: '#f1c40f' },
             { icon: 'filter_7',  color: '#e74c3c' },
@@ -412,31 +658,12 @@
             { icon: 'music_note',color: '#e91e63' }
         ];
         const SCATTER_ICON = 'star';
-        const CELL_HEIGHT = 120;
+        const CELL_HEIGHT = 100; // must match CSS .reel-cell height
         const VISIBLE_ROWS = 3;
         const REEL_COUNT = 5;
-        const STRIP_LENGTH = 60;
+        const STRIP_LENGTH = 40;
 
-        // DOM elements
-        const gameContainer = document.getElementById('gameContainer');
-        const balanceSpan = document.getElementById('balance');
-        const balanceValueSpan = document.getElementById('balanceValue');
-        const betInput = document.getElementById('bet');
-        const spinBtn = document.getElementById('spinBtn');
-        const autoSpinBtn = document.getElementById('autoSpinBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const autoSpinCountInput = document.getElementById('autoSpinCount');
-        const messageDiv = document.getElementById('message');
-        const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
-        const reelsContainer = document.getElementById('reelsContainer');
-        const confettiContainer = document.getElementById('confetti-container');
-        const musicBtn = document.getElementById('musicBtn');
-        const winOverlay = document.getElementById('winOverlay');
-
-        const reelStrips = [];
-        const reelColumns = [];
-
-        // ===================== AUDIO SYSTEM =====================
+        // ===================== AUDIO =====================
         let audioContext = null;
         let musicGainNode = null;
         let musicPlaying = false;
@@ -452,488 +679,288 @@
                 musicGainNode.gain.value = 0.15;
                 musicGainNode.connect(audioContext.destination);
             }
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
+            if (audioContext.state === 'suspended') audioContext.resume();
+        }
+        function playTone(freq, dur, type='sine', vol=0.3, when=0) {
+            initAudio();
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.value = vol;
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + dur + when);
+            osc.connect(gain); gain.connect(audioContext.destination);
+            osc.start(audioContext.currentTime + when);
+            osc.stop(audioContext.currentTime + dur + when);
+        }
+        function playSpinSound() { playTone(200,0.2,'sawtooth',0.2); playTone(150,0.3,'sawtooth',0.2); }
+        function playReelStop() { playTone(800,0.05,'square',0.2); }
+        function playWinSound() { const n=[523,659,784,1046]; n.forEach((f,i)=>playTone(f,0.15,'sine',0.3,i*0.1)); }
+        function playFreeSpinsSound() { playTone(400,0.1,'triangle',0.3); setTimeout(()=>playTone(500,0.1,'triangle',0.3),150); setTimeout(()=>playTone(600,0.2,'triangle',0.3),300); }
+        function playApplause() {
+            initAudio();
+            const dur = 0.8, now = audioContext.currentTime, bufferSize = audioContext.sampleRate * dur;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            const clapCount = 8, clapLength = Math.floor(bufferSize / clapCount);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.floor(i / clapLength) % 2 === 0) ? (Math.random()*2-1)*0.4 : 0;
+            }
+            const src = audioContext.createBufferSource(); src.buffer = buffer;
+            const gain = audioContext.createGain(); gain.gain.setValueAtTime(0.3,now); gain.gain.exponentialRampToValueAtTime(0.001,now+dur);
+            src.connect(gain); gain.connect(audioContext.destination); src.start(now);
+        }
+        function startMusic() {
+            initAudio(); if (musicPlaying) return; musicPlaying = true;
+            const notes = [261.63,329.63,392.00,523.25]; let idx=0;
+            function schedule() {
+                if (!musicPlaying) return;
+                const now = audioContext.currentTime;
+                const osc = audioContext.createOscillator(); const gain = audioContext.createGain();
+                osc.type='triangle'; osc.frequency.value=notes[idx%notes.length];
+                gain.gain.setValueAtTime(0.2,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.8);
+                osc.connect(gain); gain.connect(musicGainNode); osc.start(now); osc.stop(now+0.8);
+                idx++; setTimeout(schedule,400);
+            }
+            schedule();
+        }
+        function stopMusic() { musicPlaying = false; }
+        musicBtn.addEventListener('click', () => {
+            initAudio();
+            if (musicPlaying) { stopMusic(); musicBtn.textContent='🔇'; }
+            else { startMusic(); musicBtn.textContent='🔊'; }
+        });
+
+        // ===================== REELS =====================
+        function createReels() {
+            for (let col=0; col<REEL_COUNT; col++) {
+                const column = document.createElement('div'); column.className='reel-column';
+                const strip = document.createElement('div'); strip.className='reel-strip';
+                column.appendChild(strip); reelsContainer.appendChild(column);
+                reelColumns.push(column); reelStrips.push(strip);
+                for (let i=0; i<STRIP_LENGTH; i++) {
+                    const cell = document.createElement('div'); cell.className='reel-cell';
+                    const sym = SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+                    const iconSpan = document.createElement('span'); iconSpan.className='material-icons';
+                    iconSpan.textContent = sym.icon; iconSpan.style.color = sym.color;
+                    cell.appendChild(iconSpan); strip.appendChild(cell);
+                }
             }
         }
 
-        function playTone(frequency, duration, type = 'sine', volume = 0.3, when = 0) {
-            initAudio();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.type = type;
-            oscillator.frequency.value = frequency;
-            gainNode.gain.value = volume;
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration + when);
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.start(audioContext.currentTime + when);
-            oscillator.stop(audioContext.currentTime + duration + when);
+        function prepareStrip(strip, finalColSymbols) {
+            strip.innerHTML = '';
+            const minIndex=2, maxIndex=STRIP_LENGTH-VISIBLE_ROWS-2;
+            const idx = Math.floor(Math.random()*(maxIndex-minIndex+1))+minIndex;
+            for (let i=0; i<STRIP_LENGTH; i++) {
+                const cell=document.createElement('div'); cell.className='reel-cell';
+                let sym;
+                if (i>=idx-1 && i<=idx+1) sym = finalColSymbols[i-(idx-1)];
+                else sym = SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];
+                const iconSpan=document.createElement('span'); iconSpan.className='material-icons';
+                iconSpan.textContent=sym.icon; iconSpan.style.color=sym.color;
+                cell.appendChild(iconSpan); strip.appendChild(cell);
+            }
+            return -(idx-1)*CELL_HEIGHT;
         }
 
-        function playSpinSound() {
-            playTone(200, 0.2, 'sawtooth', 0.2);
-            playTone(150, 0.3, 'sawtooth', 0.2);
+        function highlightScatters(grid, translateYs) {
+            for (let col=0; col<REEL_COUNT; col++) {
+                const strip = reelStrips[col]; const cells = strip.children;
+                const middleIndex = Math.round(-translateYs[col]/CELL_HEIGHT)+1;
+                for (let row=0; row<VISIBLE_ROWS; row++) {
+                    const cellIndex = middleIndex+row-1;
+                    if (grid[col][row].icon===SCATTER_ICON && cells[cellIndex]) {
+                        cells[cellIndex].classList.add('win');
+                        setTimeout(()=>cells[cellIndex].classList.remove('win'),1000);
+                    }
+                }
+            }
         }
 
-        function playReelStop() {
-            playTone(800, 0.05, 'square', 0.2);
+        // ===================== STATE & SYNC =====================
+        async function fetchState() {
+            const res = await fetch('/api/state');
+            const data = await res.json();
+            balanceValueSpan.textContent = data.balance;
+            coinsHeaderSpan.textContent = data.balance;
+            betInput.max = data.balance;
+            updateFreeSpinsMsg(data.freeSpins);
+        }
+        function updateFreeSpinsMsg(count) {
+            freeSpinsMsgDiv.textContent = count>0 ? `🎁 Free spins remaining: ${count}` : "";
         }
 
-        function playWinSound() {
-            const notes = [523, 659, 784, 1046];
-            notes.forEach((freq, i) => {
-                playTone(freq, 0.15, 'sine', 0.3, i * 0.1);
+        async function syncBalanceWithFirebase() {
+            const user = firebaseAuth.currentUser;
+            if (!user) return;
+            const userRef = doc(firestore, 'users', user.uid);
+            const snap = await getDoc(userRef);
+            if (!snap.exists()) return;
+            const coins = Math.floor(snap.data().coins || 0);
+            await fetch('/api/sync-balance', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ balance: coins })
             });
         }
 
-        function playFreeSpinsSound() {
-            playTone(400, 0.1, 'triangle', 0.3);
-            setTimeout(() => playTone(500, 0.1, 'triangle', 0.3), 150);
-            setTimeout(() => playTone(600, 0.2, 'triangle', 0.3), 300);
-        }
-
-        function playApplause() {
-            initAudio();
-            const duration = 0.8;
-            const now = audioContext.currentTime;
-            const bufferSize = audioContext.sampleRate * duration;
-            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-            const data = buffer.getChannelData(0);
-            const clapCount = 8;
-            const clapLength = Math.floor(bufferSize / clapCount);
-            for (let i = 0; i < bufferSize; i++) {
-                const inClap = Math.floor(i / clapLength) % 2 === 0;
-                if (inClap) {
-                    data[i] = (Math.random() * 2 - 1) * 0.4;
-                } else {
-                    data[i] = 0;
-                }
-            }
-            const source = audioContext.createBufferSource();
-            source.buffer = buffer;
-            const gainNode = audioContext.createGain();
-            gainNode.gain.setValueAtTime(0.3, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            source.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            source.start(now);
-        }
-
-        function startMusic() {
-            initAudio();
-            if (musicPlaying) return;
-            musicPlaying = true;
-            const notes = [261.63, 329.63, 392.00, 523.25];
-            let noteIndex = 0;
-            function scheduleNextNote() {
-                if (!musicPlaying) return;
-                const now = audioContext.currentTime;
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                osc.type = 'triangle';
-                osc.frequency.value = notes[noteIndex % notes.length];
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-                osc.connect(gain);
-                gain.connect(musicGainNode);
-                osc.start(now);
-                osc.stop(now + 0.8);
-                noteIndex++;
-                setTimeout(scheduleNextNote, 400);
-            }
-            scheduleNextNote();
-        }
-
-        function stopMusic() {
-            musicPlaying = false;
-        }
-
-        musicBtn.addEventListener('click', () => {
-            initAudio();
-            if (musicPlaying) {
-                stopMusic();
-                musicBtn.textContent = '🔇';
-            } else {
-                startMusic();
-                musicBtn.textContent = '🔊';
-            }
-        });
-
-        // ===================== INITIALIZE REELS =====================
-        function createReels() {
-            for (let col = 0; col < REEL_COUNT; col++) {
-                const column = document.createElement('div');
-                column.className = 'reel-column';
-                const strip = document.createElement('div');
-                strip.className = 'reel-strip';
-                column.appendChild(strip);
-                reelsContainer.appendChild(column);
-                reelColumns.push(column);
-                reelStrips.push(strip);
-                for (let i = 0; i < STRIP_LENGTH; i++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'reel-cell';
-                    const sym = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                    const iconSpan = document.createElement('span');
-                    iconSpan.className = 'material-icons';
-                    iconSpan.textContent = sym.icon;
-                    iconSpan.style.color = sym.color;
-                    cell.appendChild(iconSpan);
-                    strip.appendChild(cell);
-                }
-            }
-        }
-
-        // ===================== STATE MANAGEMENT =====================
-        async function fetchState() {
-            try {
-                const res = await fetch('/api/state');
-                const data = await res.json();
-                balanceValueSpan.textContent = data.balance;
-                betInput.max = data.balance;
-                updateFreeSpinsMsg(data.freeSpins);
-            } catch (err) {
-                console.error('Failed to fetch state', err);
-            }
-        }
-
-        function updateFreeSpinsMsg(count) {
-            freeSpinsMsgDiv.textContent = count > 0 ? `🎁 Free spins remaining: ${count}` : "";
-        }
-
-        // ===================== SYNC BALANCE WITH FIREBASE =====================
-        async function syncBalanceWithFirebase() {
-            try {
-                const user = firebaseAuth.currentUser;
-                if (!user) return; // Not logged in, keep existing session balance
-
-                const userRef = doc(firestore, "users", user.uid);
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) return;
-
-                const userData = userSnap.data();
-                const coins = Math.floor(userData.coins || 0);
-
-                // Send balance to server to set session
-                const res = await fetch('/api/sync-balance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ balance: coins })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Sync failed');
-                console.log('Session balance synced to:', data.newBalance);
-            } catch (err) {
-                console.error('Balance sync failed:', err);
-                // Continue with existing session balance
-            }
-        }
-
-        // ===================== AUTH STATE =====================
+        // ===================== AUTH =====================
         onAuthStateChanged(firebaseAuth, async (user) => {
             if (user) {
-                // User is signed in, sync balance from Firebase
+                userInfo.style.display = 'flex';
                 await syncBalanceWithFirebase();
+            } else {
+                // Redirect to login if not signed in
+                window.location.href = 'login.html?redirect=index.html';
+                return;
             }
-            // In any case, load the game state
             await fetchState();
         });
 
-        // ===================== REEL PREPARATION =====================
-        function prepareStrip(strip, finalColumnSymbols) {
-            strip.innerHTML = '';
-            const minIndex = 2;
-            const maxIndex = STRIP_LENGTH - VISIBLE_ROWS - 2;
-            const idx = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
-            for (let i = 0; i < STRIP_LENGTH; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'reel-cell';
-                let sym;
-                if (i >= idx - 1 && i <= idx + 1) {
-                    sym = finalColumnSymbols[i - (idx - 1)];
-                } else {
-                    sym = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                }
-                const iconSpan = document.createElement('span');
-                iconSpan.className = 'material-icons';
-                iconSpan.textContent = sym.icon;
-                iconSpan.style.color = sym.color;
-                cell.appendChild(iconSpan);
-                strip.appendChild(cell);
-            }
-            return -(idx - 1) * CELL_HEIGHT;
-        }
+        // Logout function
+        window.logout = async () => {
+            await signOut(firebaseAuth);
+            window.location.href = 'login.html';
+        };
+        window.toggleDropdown = (e) => {
+            e.stopPropagation();
+            userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
+        };
+        document.addEventListener('click', (e) => {
+            if (!userInfo.contains(e.target)) userDropdown.style.display = 'none';
+        });
 
-        // ===================== HIGHLIGHT SCATTERS =====================
-        function highlightScatters(grid, finalTranslateYs) {
-            for (let col = 0; col < REEL_COUNT; col++) {
-                const strip = reelStrips[col];
-                const cells = strip.children;
-                const middleIndex = Math.round(-finalTranslateYs[col] / CELL_HEIGHT) + 1;
-                for (let row = 0; row < VISIBLE_ROWS; row++) {
-                    const cellIndex = middleIndex + row - 1;
-                    if (grid[col][row].icon === SCATTER_ICON && cells[cellIndex]) {
-                        cells[cellIndex].classList.add('win');
-                        setTimeout(() => cells[cellIndex].classList.remove('win'), 1000);
-                    }
-                }
-            }
-        }
-
-        // ===================== CONFETTI =====================
-        function spawnConfetti(count = 50) {
-            for (let i = 0; i < count; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + '%';
-                confetti.style.background = `hsl(${Math.random() * 360}, 80%, 60%)`;
-                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
-                confetti.style.animationDelay = Math.random() * 0.5 + 's';
-                confettiContainer.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 3000);
-            }
-        }
-
-        // ===================== WIN OVERLAY =====================
-        function showWinOverlay(message, duration = 2000) {
+        // ===================== WIN OVERLAYS =====================
+        function showWinOverlay(message, duration=2000) {
             winOverlay.innerHTML = message;
             winOverlay.classList.add('show');
-            setTimeout(() => {
-                winOverlay.classList.remove('show');
-                winOverlay.innerHTML = '';
-            }, duration);
+            setTimeout(()=>{ winOverlay.classList.remove('show'); winOverlay.innerHTML=''; }, duration);
         }
-
         function showTotalWinOverlay(amount) {
-            const overlay = document.createElement('div');
-            overlay.className = 'total-win-overlay';
-            overlay.innerHTML = `
-                🎉 Free spins completed!<br>Total Won: 
-                <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
-                    <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
-                    <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
-                    <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
-                </svg>
-                ${amount}
-            `;
+            const overlay = document.createElement('div'); overlay.className='total-win-overlay';
+            overlay.innerHTML = `🎉 Free spins completed!<br>Total Won: $${amount}`;
             document.body.appendChild(overlay);
-            setTimeout(() => overlay.remove(), 3000);
+            setTimeout(()=>overlay.remove(),3000);
         }
 
-        // ===================== SPIN LOGIC (same as before) =====================
-        async function spin(isFreeSpin = false, callback = null) {
+        // ===================== SPIN =====================
+        async function spin(isFreeSpin=false, callback=null) {
             if (spinBtn.disabled && !isFreeSpin && !autoSpinning) return;
-
-            spinBtn.disabled = true;
-            autoSpinBtn.disabled = true;
-            stopBtn.disabled = false;
-            messageDiv.textContent = "";
-            playSpinSound();
-
+            spinBtn.disabled = true; autoSpinBtn.disabled = true; stopBtn.disabled = false;
+            messageDiv.textContent = ""; playSpinSound();
             const bet = parseInt(betInput.value);
             const requestBody = isFreeSpin ? { isFreeSpin: true } : { bet };
-
             try {
                 const res = await fetch('/api/spin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(requestBody)
                 });
                 const data = await res.json();
-                if (!res.ok) {
-                    messageDiv.textContent = data.error || 'Error';
-                    spinBtn.disabled = false;
-                    autoSpinBtn.disabled = false;
-                    stopBtn.disabled = true;
-                    if (callback) callback();
-                    return;
-                }
-
+                if (!res.ok) { messageDiv.textContent = data.error || 'Error'; spinBtn.disabled=false; autoSpinBtn.disabled=false; stopBtn.disabled=true; if(callback) callback(); return; }
                 balanceValueSpan.textContent = data.newBalance;
+                coinsHeaderSpan.textContent = data.newBalance;
                 betInput.max = data.newBalance;
-                balanceSpan.classList.add('flash');
-                setTimeout(() => balanceSpan.classList.remove('flash'), 500);
+                balanceSpan.classList.add('flash'); setTimeout(()=>balanceSpan.classList.remove('flash'),500);
                 updateFreeSpinsMsg(data.freeSpinsRemaining);
-
                 const finalGrid = data.grid;
                 const finalTranslateYs = [];
-                for (let col = 0; col < REEL_COUNT; col++) {
-                    const translateY = prepareStrip(reelStrips[col], finalGrid[col]);
-                    finalTranslateYs.push(translateY);
-                }
-
-                reelStrips.forEach((strip, col) => {
-                    strip.style.transition = 'none';
-                    strip.style.transform = `translateY(-${STRIP_LENGTH * CELL_HEIGHT}px)`;
-                    void strip.offsetHeight;
+                for (let col=0; col<REEL_COUNT; col++) finalTranslateYs.push(prepareStrip(reelStrips[col], finalGrid[col]));
+                reelStrips.forEach((strip)=>{ strip.style.transition='none'; strip.style.transform=`translateY(-${STRIP_LENGTH*CELL_HEIGHT}px)`; void strip.offsetHeight; });
+                const overshoot=10;
+                reelStrips.forEach((strip,col)=>{
+                    const delay=col*0.15, duration=1.2, settle=0.2;
+                    const finalY=finalTranslateYs[col], overY=finalY+overshoot;
+                    strip.style.transition=`transform ${duration}s cubic-bezier(0.25,0.1,0.15,1) ${delay}s`;
+                    strip.style.transform=`translateY(${overY}px)`;
+                    setTimeout(()=>{
+                        strip.style.transition=`transform ${settle}s cubic-bezier(0.25,0.1,0.25,1)`;
+                        strip.style.transform=`translateY(${finalY}px)`;
+                    }, (duration+delay)*1000);
                 });
-
-                const overshoot = 10;
-                reelStrips.forEach((strip, col) => {
-                    const delay = col * 0.15;
-                    const duration = 1.2;
-                    const settleDuration = 0.2;
-                    const finalY = finalTranslateYs[col];
-                    const overshootY = finalY + overshoot;
-                    strip.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.15, 1) ${delay}s`;
-                    strip.style.transform = `translateY(${overshootY}px)`;
-                    const settleStart = (duration + delay) * 1000;
-                    setTimeout(() => {
-                        strip.style.transition = `transform ${settleDuration}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
-                        strip.style.transform = `translateY(${finalY}px)`;
-                    }, settleStart);
-                });
-
-                for (let col = 0; col < REEL_COUNT; col++) {
-                    const stopDelay = (1.2 + col * 0.15) * 1000;
-                    setTimeout(() => {
-                        playReelStop();
-                        reelColumns[col].classList.add('bounce');
-                        setTimeout(() => reelColumns[col].classList.remove('bounce'), 300);
+                for (let col=0; col<REEL_COUNT; col++) {
+                    setTimeout(()=>{
+                        playReelStop(); reelColumns[col].classList.add('bounce');
+                        setTimeout(()=>reelColumns[col].classList.remove('bounce'),300);
                         if (isFreeSpin) playApplause();
-                    }, stopDelay);
+                    }, (1.2+col*0.15)*1000);
                 }
-
-                const maxEndTime = 1.2 + (REEL_COUNT - 1) * 0.15 + 0.2;
-                setTimeout(() => {
-                    reelStrips.forEach(strip => strip.style.transition = 'none');
-
+                const maxEndTime = 1.2 + (REEL_COUNT-1)*0.15 + 0.2;
+                setTimeout(()=>{
+                    reelStrips.forEach(s=>s.style.transition='none');
                     if (isFreeSpin) freeSpinTotalWin += data.winAmount || 0;
-
-                    if (data.scatters >= 3) {
+                    if (data.scatters>=3) {
                         highlightScatters(finalGrid, finalTranslateYs);
                         playWinSound();
-                        showWinOverlay(`
-                            WIN 
-                            <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
-                                <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
-                                <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
-                                <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
-                            </svg>
-                            ${data.winAmount}!
-                        `);
+                        showWinOverlay(`WIN $${data.winAmount}!`);
                         gameContainer.classList.add('win-animation');
-                        setTimeout(() => gameContainer.classList.remove('win-animation'), 1800);
-                        const confettiCount = data.scatters >= 5 ? 100 : 50;
-                        spawnConfetti(confettiCount);
+                        setTimeout(()=>gameContainer.classList.remove('win-animation'),1800);
+                        spawnConfetti(data.scatters>=5?100:50);
                     }
-
-                    let msg = "";
-                    if (data.scatters >= 3) {
-                        msg = `✨ ${data.scatters} scatters! You win 🪙${data.winAmount}`;
-                        if (data.freeSpinsAwarded > 0) {
-                            msg += ` + ${data.freeSpinsAwarded} free spins!`;
-                            playFreeSpinsSound();
-                        }
-                    } else {
-                        msg = "No scatter win. Try again!";
-                    }
+                    let msg = data.scatters>=3 ? `✨ ${data.scatters} scatters! You win $${data.winAmount}` : "No scatter win. Try again!";
+                    if (data.freeSpinsAwarded>0) { msg += ` + ${data.freeSpinsAwarded} free spins!`; playFreeSpinsSound(); }
                     messageDiv.innerHTML = msg;
-
                     spinBtn.disabled = autoSpinning;
                     autoSpinBtn.disabled = autoSpinning;
                     stopBtn.disabled = !autoSpinning;
-
-                    if (data.freeSpinsRemaining > 0) {
-                        setTimeout(() => spin(true, callback), 1500);
-                    } else {
-                        if (isFreeSpin && data.freeSpinsRemaining === 0) {
-                            showTotalWinOverlay(freeSpinTotalWin);
-                            freeSpinTotalWin = 0;
-                        }
+                    if (data.freeSpinsRemaining>0) setTimeout(()=>spin(true, callback),1500);
+                    else {
+                        if (isFreeSpin && data.freeSpinsRemaining===0) { showTotalWinOverlay(freeSpinTotalWin); freeSpinTotalWin=0; }
                         if (callback) callback();
                     }
-                }, maxEndTime * 1000 + 100);
-
+                }, maxEndTime*1000+100);
             } catch (err) {
-                console.error('Spin failed', err);
-                messageDiv.textContent = 'Network error';
-                spinBtn.disabled = false;
-                autoSpinBtn.disabled = false;
-                stopBtn.disabled = true;
+                console.error(err); messageDiv.textContent='Network error';
+                spinBtn.disabled=false; autoSpinBtn.disabled=false; stopBtn.disabled=true;
                 if (callback) callback();
             }
         }
 
-        // ===================== AUTO-SPIN LOGIC =====================
+        function spawnConfetti(count=50) {
+            for (let i=0; i<count; i++) {
+                const c=document.createElement('div'); c.className='confetti';
+                c.style.left=Math.random()*100+'%';
+                c.style.background=`hsl(${Math.random()*360},80%,60%)`;
+                c.style.animationDuration=(Math.random()*2+2)+'s';
+                c.style.animationDelay=Math.random()*0.5+'s';
+                confettiContainer.appendChild(c);
+                setTimeout(()=>c.remove(),3000);
+            }
+        }
+
+        // ===================== AUTO-SPIN =====================
         function startAutoSpin() {
             if (autoSpinning) return;
-
             const count = parseInt(autoSpinCountInput.value);
-            if (isNaN(count) || count < 1) {
-                messageDiv.textContent = "Please enter a valid number of spins.";
-                return;
-            }
-
-            autoSpinning = true;
-            autoSpinsRemaining = count;
-            autoSpinBtn.disabled = true;
-            stopBtn.disabled = false;
-            spinBtn.disabled = true;
-            autoSpinCountInput.disabled = true;
-
+            if (isNaN(count)||count<1) { messageDiv.textContent='Please enter a valid number.'; return; }
+            autoSpinning=true; autoSpinsRemaining=count;
+            autoSpinBtn.disabled=true; stopBtn.disabled=false; spinBtn.disabled=true; autoSpinCountInput.disabled=true;
             spin(false, autoSpinCallback);
         }
-
         function autoSpinCallback() {
-            if (!autoSpinning) {
-                spinBtn.disabled = false;
-                autoSpinBtn.disabled = false;
-                stopBtn.disabled = true;
-                autoSpinCountInput.disabled = false;
-                return;
+            if (!autoSpinning) { spinBtn.disabled=false; autoSpinBtn.disabled=false; stopBtn.disabled=true; autoSpinCountInput.disabled=false; return; }
+            if (autoSpinsRemaining<=1) {
+                autoSpinsRemaining=0; autoSpinning=false;
+                spinBtn.disabled=false; autoSpinBtn.disabled=false; stopBtn.disabled=true; autoSpinCountInput.disabled=false;
+                messageDiv.textContent='Auto spin completed.'; return;
             }
-
-            if (autoSpinsRemaining <= 1) {
-                autoSpinsRemaining = 0;
-                autoSpinning = false;
-                spinBtn.disabled = false;
-                autoSpinBtn.disabled = false;
-                stopBtn.disabled = true;
-                autoSpinCountInput.disabled = false;
-                messageDiv.textContent = "Auto spin completed.";
-                return;
-            }
-
             autoSpinsRemaining--;
-
-            const currentBalance = parseInt(balanceValueSpan.textContent);
-            const bet = parseInt(betInput.value);
-            if (currentBalance < bet || bet < 1) {
-                autoSpinning = false;
-                spinBtn.disabled = false;
-                autoSpinBtn.disabled = false;
-                stopBtn.disabled = true;
-                autoSpinCountInput.disabled = false;
-                messageDiv.textContent = "Auto spin stopped: insufficient coins.";
-                return;
-            }
-
-            autoSpinTimer = setTimeout(() => {
-                spin(false, autoSpinCallback);
-            }, 1500);
+            const bal=parseInt(balanceValueSpan.textContent), bet=parseInt(betInput.value);
+            if (bal<bet || bet<1) { autoSpinning=false; spinBtn.disabled=false; autoSpinBtn.disabled=false; stopBtn.disabled=true; autoSpinCountInput.disabled=false; messageDiv.textContent='Auto spin stopped: insufficient coins.'; return; }
+            autoSpinTimer = setTimeout(()=>spin(false, autoSpinCallback), 1500);
         }
-
         function stopAutoSpin() {
             if (!autoSpinning) return;
-            autoSpinning = false;
-            if (autoSpinTimer) {
-                clearTimeout(autoSpinTimer);
-                autoSpinTimer = null;
-            }
-            stopBtn.disabled = true;
-            autoSpinCountInput.disabled = false;
+            autoSpinning=false; clearTimeout(autoSpinTimer);
+            stopBtn.disabled=true; autoSpinCountInput.disabled=false;
         }
 
-        // ===================== EVENT LISTENERS =====================
-        spinBtn.addEventListener('click', () => spin(false));
+        // Event listeners
+        spinBtn.addEventListener('click', ()=>spin(false));
         autoSpinBtn.addEventListener('click', startAutoSpin);
         stopBtn.addEventListener('click', stopAutoSpin);
 
-        // ===================== INITIALIZATION =====================
+        // Initialize reels and start auth
         createReels();
-        // fetchState will be called after auth check via onAuthStateChanged
+        // fetchState will be triggered by onAuthStateChanged
     </script>
 </body>
 </html>
