@@ -85,7 +85,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.15, 1);
+            /* transition set dynamically by JS */
         }
         .reel-cell {
             height: 120px;
@@ -108,7 +108,7 @@
             from { box-shadow: 0 0 8px #f1c40f; }
             to { box-shadow: 0 0 25px #f39c12; }
         }
-        /* Reel bounce on stop */
+        /* Reel bounce on stop (extra bounce after overshoot) */
         .reel-column.bounce {
             animation: bounce 0.3s ease-in-out;
         }
@@ -186,10 +186,30 @@
             0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
+        /* Music toggle button */
+        .music-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            border: none;
+            color: #fff;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 50%;
+            opacity: 0.7;
+            transition: opacity 0.2s, background 0.2s;
+        }
+        .music-btn:hover {
+            opacity: 1;
+            background: #555;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
+        <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
         <h1>🎰 SCATTER SLOTS</h1>
         <div class="balance" id="balance">💰 Balance: $<span id="balanceValue">0</span></div>
         <div class="bet-control">
@@ -221,10 +241,10 @@
             { icon: 'music_note',color: '#e91e63' }
         ];
         const SCATTER_ICON = 'star';
-        const CELL_HEIGHT = 120;
+        const CELL_HEIGHT = 120;          // px
         const VISIBLE_ROWS = 3;
         const REEL_COUNT = 5;
-        const STRIP_LENGTH = 30;
+        const STRIP_LENGTH = 60;          // Increased for smoother spin (was 30)
 
         // DOM elements
         const balanceSpan = document.getElementById('balance');
@@ -235,19 +255,26 @@
         const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
         const reelsContainer = document.getElementById('reelsContainer');
         const confettiContainer = document.getElementById('confetti-container');
+        const musicBtn = document.getElementById('musicBtn');
 
         const reelStrips = [];
         const reelColumns = [];
 
-        // ===================== AUDIO (Web Audio API) =====================
+        // ===================== AUDIO SYSTEM (Web Audio API) =====================
         let audioContext = null;
+        let musicGainNode = null;
+        let musicPlaying = false;
 
         function initAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                musicGainNode = audioContext.createGain();
+                musicGainNode.gain.value = 0.15; // background music volume
+                musicGainNode.connect(audioContext.destination);
             }
         }
 
+        // ----- Sound Effects -----
         function playTone(frequency, duration, type = 'sine', volume = 0.3) {
             initAudio();
             const oscillator = audioContext.createOscillator();
@@ -282,6 +309,48 @@
             setTimeout(() => playTone(500, 0.1, 'triangle', 0.3), 150);
             setTimeout(() => playTone(600, 0.2, 'triangle', 0.3), 300);
         }
+
+        // ----- Background Music Loop (casino-style arpeggio) -----
+        function startMusic() {
+            initAudio();
+            if (musicPlaying) return;
+            musicPlaying = true;
+            const notes = [261.63, 329.63, 392.00, 523.25]; // C, E, G, C
+            let noteIndex = 0;
+            function scheduleNextNote() {
+                if (!musicPlaying) return;
+                const now = audioContext.currentTime;
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = notes[noteIndex % notes.length];
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc.connect(gain);
+                gain.connect(musicGainNode);
+                osc.start(now);
+                osc.stop(now + 0.8);
+                noteIndex++;
+                // Schedule next note after 0.4s
+                setTimeout(scheduleNextNote, 400);
+            }
+            scheduleNextNote();
+        }
+
+        function stopMusic() {
+            musicPlaying = false;
+        }
+
+        musicBtn.addEventListener('click', () => {
+            initAudio();
+            if (musicPlaying) {
+                stopMusic();
+                musicBtn.textContent = '🔇';
+            } else {
+                startMusic();
+                musicBtn.textContent = '🔊';
+            }
+        });
 
         // ===================== INITIALIZE REELS =====================
         function createReels() {
@@ -328,7 +397,10 @@
         // ===================== REEL PREPARATION =====================
         function prepareStrip(strip, finalColumnSymbols) {
             strip.innerHTML = '';
-            const idx = Math.floor(Math.random() * (STRIP_LENGTH - VISIBLE_ROWS + 1)) + 1;
+            // We choose a random index such that there are enough cells above and below
+            const minIndex = 2; // need at least 2 above for possible overshoot
+            const maxIndex = STRIP_LENGTH - VISIBLE_ROWS - 2; // and 2 below
+            const idx = Math.floor(Math.random() * (maxIndex - minIndex + 1)) + minIndex;
             for (let i = 0; i < STRIP_LENGTH; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'reel-cell';
@@ -345,6 +417,8 @@
                 cell.appendChild(iconSpan);
                 strip.appendChild(cell);
             }
+            // The middle visible row is at index idx
+            // The top of the visible area corresponds to translateY = -(idx - 1) * CELL_HEIGHT
             return -(idx - 1) * CELL_HEIGHT;
         }
 
@@ -415,18 +489,40 @@
                     finalTranslateYs.push(translateY);
                 }
 
-                // Animate reels
+                // ----- REALISTIC ANIMATION WITH OVERSHOOT -----
+                // First, set initial position (way up)
                 reelStrips.forEach((strip, col) => {
                     strip.style.transition = 'none';
                     strip.style.transform = `translateY(-${STRIP_LENGTH * CELL_HEIGHT}px)`;
-                    void strip.offsetHeight;
-                    strip.style.transition = `transform 1.2s cubic-bezier(0.25, 0.1, 0.15, 1) ${col * 0.1}s`;
-                    strip.style.transform = `translateY(${finalTranslateYs[col]}px)`;
+                    void strip.offsetHeight; // reflow
                 });
 
-                // Sound for each reel stop (delayed)
+                // Determine overshoot: e.g., overshoot by 10px beyond final
+                const overshoot = 10; // px
+
+                // For each reel, animate to final + overshoot first, then after a short delay, settle to final
+                reelStrips.forEach((strip, col) => {
+                    const delay = col * 0.15; // seconds
+                    const duration = 1.2; // seconds for main spin
+                    const settleDuration = 0.2; // seconds for settle
+                    const finalY = finalTranslateYs[col];
+                    const overshootY = finalY + overshoot;
+
+                    // Main spin to overshoot position
+                    strip.style.transition = `transform ${duration}s cubic-bezier(0.25, 0.1, 0.15, 1) ${delay}s`;
+                    strip.style.transform = `translateY(${overshootY}px)`;
+
+                    // After main spin, settle to final
+                    const settleStart = (duration + delay) * 1000;
+                    setTimeout(() => {
+                        strip.style.transition = `transform ${settleDuration}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+                        strip.style.transform = `translateY(${finalY}px)`;
+                    }, settleStart);
+                });
+
+                // Sound for each reel stop (trigger at overshoot time)
                 for (let col = 0; col < REEL_COUNT; col++) {
-                    const stopDelay = (1.2 + col * 0.1) * 1000; // ms
+                    const stopDelay = (1.2 + col * 0.15) * 1000; // ms
                     setTimeout(() => {
                         playReelStop();
                         reelColumns[col].classList.add('bounce');
@@ -434,9 +530,11 @@
                     }, stopDelay);
                 }
 
-                const maxDuration = 1.2 + (REEL_COUNT - 1) * 0.1;
+                // Process win after all reels have settled
+                const maxEndTime = 1.2 + (REEL_COUNT - 1) * 0.15 + 0.2; // main + last delay + settle
                 setTimeout(() => {
-                    // Highlight scatters if win
+                    // Remove transition for safety
+                    reelStrips.forEach(strip => strip.style.transition = 'none');
                     if (data.scatters >= 3) {
                         highlightScatters(finalGrid, finalTranslateYs);
                         playWinSound();
@@ -444,7 +542,6 @@
                             spawnConfetti(100);
                         }
                     }
-                    // Display message
                     let msg = "";
                     if (data.scatters >= 3) {
                         msg = `✨ ${data.scatters} scatters! You win $${data.winAmount}`;
@@ -459,11 +556,10 @@
 
                     spinBtn.disabled = false;
 
-                    // If free spins remain, auto-spin after delay
                     if (data.freeSpinsRemaining > 0) {
                         setTimeout(() => spin(true), 1500);
                     }
-                }, maxDuration * 1000 + 200);
+                }, maxEndTime * 1000 + 100);
 
             } catch (err) {
                 console.error('Spin failed', err);
