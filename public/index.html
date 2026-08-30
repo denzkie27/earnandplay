@@ -101,7 +101,6 @@
             transform: scale(1.05);
             border-color: rgba(255, 255, 255, .15);
         }
-        /* Styling for Material Icons inside header buttons */
         .header-icon-btn .material-icons {
             font-size: 22px;
             opacity: .85;
@@ -533,7 +532,7 @@
 </head>
 <body>
 
-    <!-- ========== HEADER (same as earn page, but using Material Icons) ========== -->
+    <!-- ========== HEADER (same as earn page, using Material Icons) ========== -->
     <header class="nf-header">
         <div class="header-left">
             <button class="header-icon-btn" onclick="history.back()"><span class="material-icons">arrow_back</span></button>
@@ -615,7 +614,7 @@
         // ===================== FIREBASE =====================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
@@ -818,6 +817,19 @@
             });
         }
 
+        // NEW: Update Firebase balance after each spin
+        async function updateFirebaseBalance(newBalance) {
+            const user = firebaseAuth.currentUser;
+            if (!user) return;
+            const userRef = doc(firestore, 'users', user.uid);
+            try {
+                await setDoc(userRef, { coins: Math.floor(newBalance) }, { merge: true });
+                console.log('Firebase balance updated to', newBalance);
+            } catch (err) {
+                console.error('Failed to update Firebase balance:', err);
+            }
+        }
+
         // ===================== AUTH =====================
         onAuthStateChanged(firebaseAuth, async (user) => {
             if (user) {
@@ -910,6 +922,10 @@
                     let msg = data.scatters>=3 ? `✨ ${data.scatters} scatters! You win $${data.winAmount}` : "No scatter win. Try again!";
                     if (data.freeSpinsAwarded>0) { msg += ` + ${data.freeSpinsAwarded} free spins!`; playFreeSpinsSound(); }
                     messageDiv.innerHTML = msg;
+
+                    // Update Firebase with new balance
+                    updateFirebaseBalance(data.newBalance);
+
                     spinBtn.disabled = autoSpinning;
                     autoSpinBtn.disabled = autoSpinning;
                     stopBtn.disabled = !autoSpinning;
