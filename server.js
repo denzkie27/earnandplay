@@ -17,7 +17,7 @@ app.use(session({
 
 // Game configuration (server-side, not accessible to client)
 const SYMBOLS = [
-    { icon: 'star',      color: '#f1c40f' },  // scatter
+    { icon: 'star',      color: '#f1c40f' },
     { icon: 'filter_7',  color: '#e74c3c' },
     { icon: 'diamond',   color: '#3498db' },
     { icon: 'favorite',  color: '#e74c3c' },
@@ -31,8 +31,8 @@ const SYMBOLS = [
     { icon: 'music_note',color: '#e91e63' }
 ];
 const SCATTER_ICON = 'star';
-const SCATTER_PAYOUTS = { 3: 2, 4: 5, 5: 10, 6: 20, 7: 50 };  // Lower multipliers
-const FREE_SPINS = { 3: 2, 4: 4, 5: 8, 6: 12, 7: 20 };        // Fewer free spins
+const SCATTER_PAYOUTS = { 3: 2, 4: 5, 5: 10, 6: 20, 7: 50 };
+const FREE_SPINS = { 3: 2, 4: 4, 5: 8, 6: 12, 7: 20 };
 const VISIBLE_ROWS = 3;
 const REEL_COUNT = 5;
 
@@ -122,6 +122,17 @@ app.post('/api/spin', (req, res) => {
         freeSpinsRemaining: req.session.freeSpins,
         betAmount
     });
+});
+
+// NEW: Endpoint to add coins to session (called from Earn page)
+app.post('/api/add-coins', (req, res) => {
+    initGame(req);
+    const amount = parseInt(req.body.amount);
+    if (isNaN(amount) || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid amount.' });
+    }
+    req.session.balance += amount;
+    res.json({ newBalance: req.session.balance });
 });
 
 app.listen(PORT, () => {
