@@ -128,7 +128,7 @@
         .spin-btn {
             background: #e67e22;
             border: none;
-            padding: 15px 40px;
+            padding: 15px 30px;
             font-size: 1.6em;
             font-weight: bold;
             border-radius: 40px;
@@ -145,6 +145,40 @@
             cursor: not-allowed;
             transform: none;
             text-shadow: none;
+        }
+        .auto-spin-btn, .stop-btn {
+            background: #3498db;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            color: #fff;
+            text-shadow: 1px 1px 0 #1f5a7a;
+            letter-spacing: 1px;
+            margin: 0 5px;
+        }
+        .auto-spin-btn:hover { background: #2980b9; }
+        .auto-spin-btn:active { transform: scale(0.95); }
+        .auto-spin-btn:disabled, .stop-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+            text-shadow: none;
+        }
+        .stop-btn {
+            background: #e74c3c;
+            text-shadow: 1px 1px 0 #922b21;
+        }
+        .stop-btn:hover { background: #c0392b; }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
         }
         .message {
             min-height: 50px;
@@ -265,7 +299,11 @@
             <input type="number" id="bet" value="1" min="1" max="100">
         </div>
         <div class="reels-container" id="reelsContainer"></div>
-        <button class="spin-btn" id="spinBtn">SPIN</button>
+        <div class="button-row">
+            <button class="spin-btn" id="spinBtn">SPIN</button>
+            <button class="auto-spin-btn" id="autoSpinBtn">AUTO SPIN</button>
+            <button class="stop-btn" id="stopBtn" disabled>STOP</button>
+        </div>
         <div class="message" id="message"></div>
         <div class="free-spins-msg" id="freeSpinsMsg"></div>
         <div class="scatter-info">⭐ = Scatter | 3⭐ = 5x + 5 spins | 4⭐ = 10x + 10 spins | 5⭐ = 50x + 20 spins | 6⭐ = 100x + 30 spins | 7⭐ = 200x + 50 spins</div>
@@ -301,6 +339,8 @@
         const balanceValueSpan = document.getElementById('balanceValue');
         const betInput = document.getElementById('bet');
         const spinBtn = document.getElementById('spinBtn');
+        const autoSpinBtn = document.getElementById('autoSpinBtn');
+        const stopBtn = document.getElementById('stopBtn');
         const messageDiv = document.getElementById('message');
         const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
         const reelsContainer = document.getElementById('reelsContainer');
@@ -315,7 +355,9 @@
         let audioContext = null;
         let musicGainNode = null;
         let musicPlaying = false;
-        let freeSpinTotalWin = 0; // accumulate winnings from free spins
+        let freeSpinTotalWin = 0;
+        let autoSpinning = false;
+        let autoSpinTimer = null;
 
         function initAudio() {
             if (!audioContext) {
@@ -362,7 +404,6 @@
             setTimeout(() => playTone(600, 0.2, 'triangle', 0.3), 300);
         }
 
-        // Synthetic applause: series of short noise bursts
         function playApplause() {
             initAudio();
             const duration = 0.8;
@@ -370,11 +411,10 @@
             const bufferSize = audioContext.sampleRate * duration;
             const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
             const data = buffer.getChannelData(0);
-            // Generate noise bursts (claps) at intervals
             const clapCount = 8;
             const clapLength = Math.floor(bufferSize / clapCount);
             for (let i = 0; i < bufferSize; i++) {
-                const inClap = Math.floor(i / clapLength) % 2 === 0; // alternate claps
+                const inClap = Math.floor(i / clapLength) % 2 === 0;
                 if (inClap) {
                     data[i] = (Math.random() * 2 - 1) * 0.4;
                 } else {
@@ -391,7 +431,6 @@
             source.start(now);
         }
 
-        // Background music
         function startMusic() {
             initAudio();
             if (musicPlaying) return;
@@ -539,7 +578,6 @@
             }, duration);
         }
 
-        // Show total winnings from free spins (fixed overlay)
         function showTotalWinOverlay(amount) {
             const overlay = document.createElement('div');
             overlay.className = 'total-win-overlay';
@@ -548,9 +586,14 @@
             setTimeout(() => overlay.remove(), 3000);
         }
 
-        // ===================== SPIN LOGIC =====================
-        async function spin(isFreeSpin = false) {
+        // ===================== SPIN LOGIC (MODIFIED FOR AUTO-SPIN) =====================
+        async function spin(isFreeSpin = false, callback = null) {
+            // Prevent double spins
+            if (spinBtn.disabled && !isFreeSpin) return;
+
             spinBtn.disabled = true;
+            autoSpinBtn.disabled = true;
+            stopBtn.disabled = false;
             messageDiv.textContent = "";
             playSpinSound();
 
@@ -567,17 +610,18 @@
                 if (!res.ok) {
                     messageDiv.textContent = data.error || 'Error';
                     spinBtn.disabled = false;
+                    autoSpinBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    if (callback) callback();
                     return;
                 }
 
-                // Update balance display
                 balanceValueSpan.textContent = data.newBalance;
                 betInput.max = data.newBalance;
                 balanceSpan.classList.add('flash');
                 setTimeout(() => balanceSpan.classList.remove('flash'), 500);
                 updateFreeSpinsMsg(data.freeSpinsRemaining);
 
-                // Prepare reels
                 const finalGrid = data.grid;
                 const finalTranslateYs = [];
                 for (let col = 0; col < REEL_COUNT; col++) {
@@ -585,7 +629,6 @@
                     finalTranslateYs.push(translateY);
                 }
 
-                // Animate reels with overshoot
                 reelStrips.forEach((strip, col) => {
                     strip.style.transition = 'none';
                     strip.style.transform = `translateY(-${STRIP_LENGTH * CELL_HEIGHT}px)`;
@@ -608,29 +651,21 @@
                     }, settleStart);
                 });
 
-                // Reel stop sounds and bounce
                 for (let col = 0; col < REEL_COUNT; col++) {
                     const stopDelay = (1.2 + col * 0.15) * 1000;
                     setTimeout(() => {
                         playReelStop();
                         reelColumns[col].classList.add('bounce');
                         setTimeout(() => reelColumns[col].classList.remove('bounce'), 300);
-                        // If it's a free spin, play applause at each reel stop
-                        if (isFreeSpin) {
-                            playApplause();
-                        }
+                        if (isFreeSpin) playApplause();
                     }, stopDelay);
                 }
 
-                // Process result after all reels stop
                 const maxEndTime = 1.2 + (REEL_COUNT - 1) * 0.15 + 0.2;
                 setTimeout(() => {
                     reelStrips.forEach(strip => strip.style.transition = 'none');
 
-                    // Handle free spin total accumulation
-                    if (isFreeSpin) {
-                        freeSpinTotalWin += data.winAmount || 0;
-                    }
+                    if (isFreeSpin) freeSpinTotalWin += data.winAmount || 0;
 
                     if (data.scatters >= 3) {
                         highlightScatters(finalGrid, finalTranslateYs);
@@ -654,15 +689,19 @@
                     }
                     messageDiv.textContent = msg;
 
+                    // Enable buttons appropriately
                     spinBtn.disabled = false;
+                    autoSpinBtn.disabled = autoSpinning;
+                    stopBtn.disabled = !autoSpinning;
 
-                    // If free spins remain, schedule next free spin
                     if (data.freeSpinsRemaining > 0) {
-                        setTimeout(() => spin(true), 1500);
-                    } else if (isFreeSpin && data.freeSpinsRemaining === 0) {
-                        // This was the last free spin; show total winnings
-                        showTotalWinOverlay(freeSpinTotalWin);
-                        freeSpinTotalWin = 0; // reset for next round
+                        setTimeout(() => spin(true, callback), 1500);
+                    } else {
+                        if (isFreeSpin && data.freeSpinsRemaining === 0) {
+                            showTotalWinOverlay(freeSpinTotalWin);
+                            freeSpinTotalWin = 0;
+                        }
+                        if (callback) callback();
                     }
                 }, maxEndTime * 1000 + 100);
 
@@ -670,11 +709,58 @@
                 console.error('Spin failed', err);
                 messageDiv.textContent = 'Network error';
                 spinBtn.disabled = false;
+                autoSpinBtn.disabled = false;
+                stopBtn.disabled = true;
+                if (callback) callback();
             }
+        }
+
+        // ===================== AUTO-SPIN LOGIC =====================
+        function startAutoSpin() {
+            if (autoSpinning) return;
+            autoSpinning = true;
+            autoSpinBtn.disabled = true;
+            stopBtn.disabled = false;
+            spinBtn.disabled = true;
+            spin(false, autoSpinCallback);
+        }
+
+        function autoSpinCallback() {
+            if (!autoSpinning) {
+                spinBtn.disabled = false;
+                autoSpinBtn.disabled = false;
+                stopBtn.disabled = true;
+                return;
+            }
+            const currentBalance = parseInt(balanceValueSpan.textContent);
+            const bet = parseInt(betInput.value);
+            if (currentBalance < bet || bet < 1) {
+                autoSpinning = false;
+                spinBtn.disabled = false;
+                autoSpinBtn.disabled = false;
+                stopBtn.disabled = true;
+                messageDiv.textContent = "Auto spin stopped: insufficient balance.";
+                return;
+            }
+            autoSpinTimer = setTimeout(() => {
+                spin(false, autoSpinCallback);
+            }, 1500);
+        }
+
+        function stopAutoSpin() {
+            if (!autoSpinning) return;
+            autoSpinning = false;
+            if (autoSpinTimer) {
+                clearTimeout(autoSpinTimer);
+                autoSpinTimer = null;
+            }
+            stopBtn.disabled = true;
         }
 
         // ===================== EVENT LISTENERS =====================
         spinBtn.addEventListener('click', () => spin(false));
+        autoSpinBtn.addEventListener('click', startAutoSpin);
+        stopBtn.addEventListener('click', stopAutoSpin);
 
         // ===================== INITIALIZATION =====================
         createReels();
