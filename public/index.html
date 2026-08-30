@@ -6,6 +6,7 @@
     <title>Scatter Slot – Coins Edition</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        /* Keep all existing styles exactly the same */
         * { box-sizing: border-box; }
         body {
             font-family: 'Arial', sans-serif;
@@ -375,8 +376,27 @@
     </div>
     <div id="confetti-container"></div>
 
-    <script>
-        // ===================== CONFIGURATION =====================
+    <script type="module">
+        // ===================== FIREBASE (ADDED FOR BALANCE SYNC) =====================
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
+            authDomain: "yourtv-c12eb.firebaseapp.com",
+            projectId: "yourtv-c12eb",
+            storageBucket: "yourtv-c12eb.firebasestorage.app",
+            messagingSenderId: "28690991912",
+            appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
+            measurementId: "G-CC7DLZS0NB"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const firebaseAuth = getAuth(firebaseApp);
+        const firestore = getFirestore(firebaseApp);
+
+        // ===================== GAME CONFIGURATION =====================
         const SYMBOLS = [
             { icon: 'star',      color: '#f1c40f' },
             { icon: 'filter_7',  color: '#e74c3c' },
@@ -582,6 +602,44 @@
             freeSpinsMsgDiv.textContent = count > 0 ? `🎁 Free spins remaining: ${count}` : "";
         }
 
+        // ===================== SYNC BALANCE WITH FIREBASE =====================
+        async function syncBalanceWithFirebase() {
+            try {
+                const user = firebaseAuth.currentUser;
+                if (!user) return; // Not logged in, keep existing session balance
+
+                const userRef = doc(firestore, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                if (!userSnap.exists()) return;
+
+                const userData = userSnap.data();
+                const coins = Math.floor(userData.coins || 0);
+
+                // Send balance to server to set session
+                const res = await fetch('/api/sync-balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ balance: coins })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Sync failed');
+                console.log('Session balance synced to:', data.newBalance);
+            } catch (err) {
+                console.error('Balance sync failed:', err);
+                // Continue with existing session balance
+            }
+        }
+
+        // ===================== AUTH STATE =====================
+        onAuthStateChanged(firebaseAuth, async (user) => {
+            if (user) {
+                // User is signed in, sync balance from Firebase
+                await syncBalanceWithFirebase();
+            }
+            // In any case, load the game state
+            await fetchState();
+        });
+
         // ===================== REEL PREPARATION =====================
         function prepareStrip(strip, finalColumnSymbols) {
             strip.innerHTML = '';
@@ -639,7 +697,7 @@
 
         // ===================== WIN OVERLAY =====================
         function showWinOverlay(message, duration = 2000) {
-            winOverlay.innerHTML = message;  // Use innerHTML to support SVG
+            winOverlay.innerHTML = message;
             winOverlay.classList.add('show');
             setTimeout(() => {
                 winOverlay.classList.remove('show');
@@ -663,7 +721,7 @@
             setTimeout(() => overlay.remove(), 3000);
         }
 
-        // ===================== SPIN LOGIC =====================
+        // ===================== SPIN LOGIC (same as before) =====================
         async function spin(isFreeSpin = false, callback = null) {
             if (spinBtn.disabled && !isFreeSpin && !autoSpinning) return;
 
@@ -875,7 +933,7 @@
 
         // ===================== INITIALIZATION =====================
         createReels();
-        fetchState();
+        // fetchState will be called after auth check via onAuthStateChanged
     </script>
 </body>
 </html>
