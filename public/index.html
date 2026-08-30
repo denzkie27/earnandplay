@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="fonts-loaded">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -524,6 +524,11 @@
         .coin-svg { width: 20px; height: 20px; display: inline-block; flex-shrink: 0; }
         .coin-svg-big { width: 32px; height: 32px; }
         .coin-svg-small { width: 14px; height: 14px; }
+
+        /* ========== ICON FIX ========== */
+        .nx-icon {
+            color: inherit;  /* Changed from transparent to inherit */
+        }
     </style>
 </head>
 <body>
@@ -565,7 +570,6 @@
 
             <div class="balance" id="balance">
                 <span>💰 Balance:</span>
-                <!-- Coin SVG -->
                 <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
                     <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
@@ -577,7 +581,6 @@
             <div class="bet-control">
                 <label for="bet">
                     <span>Bet:</span>
-                    <!-- Coin SVG -->
                     <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
                         <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
@@ -609,19 +612,17 @@
     <div id="confetti-container"></div>
 
     <script>
-  // Make Material Symbols icons visible once fonts are ready
-  document.fonts.ready.then(() => {
-    document.documentElement.classList.add('fonts-loaded');
-  });
-  // Fallback in case the font doesn't load within 5 seconds
-  setTimeout(() => {
-    if (!document.documentElement.classList.contains('fonts-loaded')) {
-      document.documentElement.classList.add('fonts-loaded');
-    }
-  }, 5000);
-</script>
+        // Font loading fix (optional but harmless)
+        document.fonts.ready.then(() => {
+            document.documentElement.classList.add('fonts-loaded');
+        });
+        setTimeout(() => {
+            if (!document.documentElement.classList.contains('fonts-loaded')) {
+                document.documentElement.classList.add('fonts-loaded');
+            }
+        }, 5000);
+    </script>
 
-    <!-- ========== JAVASCRIPT (slot logic + Firebase sync + header auth) ========== -->
     <script type="module">
         // ===================== FIREBASE =====================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
@@ -644,7 +645,7 @@
         // ===================== DOM ELEMENTS =====================
         const gameContainer = document.getElementById('gameContainer');
         const balanceValueSpan = document.getElementById('balanceValue');
-        const balanceSpan = document.getElementById('balance'); // <-- FIX: added missing variable
+        const balanceSpan = document.getElementById('balance');
         const coinsHeaderSpan = document.getElementById('coinsHeader');
         const betInput = document.getElementById('bet');
         const spinBtn = document.getElementById('spinBtn');
@@ -679,7 +680,7 @@
             { icon: 'music_note',color: '#e91e63' }
         ];
         const SCATTER_ICON = 'star';
-        const CELL_HEIGHT = 100; // must match CSS .reel-cell height
+        const CELL_HEIGHT = 100;
         const VISIBLE_ROWS = 3;
         const REEL_COUNT = 5;
         const STRIP_LENGTH = 40;
@@ -835,14 +836,12 @@
                 userInfo.style.display = 'flex';
                 await syncBalanceWithFirebase();
             } else {
-                // Redirect to login if not signed in
                 window.location.href = 'login.html?redirect=index.html';
                 return;
             }
             await fetchState();
         });
 
-        // Logout function
         window.logout = async () => {
             await signOut(firebaseAuth);
             window.location.href = 'login.html';
@@ -884,7 +883,7 @@
                 balanceValueSpan.textContent = data.newBalance;
                 coinsHeaderSpan.textContent = data.newBalance;
                 betInput.max = data.newBalance;
-                balanceSpan.classList.add('flash'); setTimeout(()=>balanceSpan.classList.remove('flash'),500); // <-- now works
+                balanceSpan.classList.add('flash'); setTimeout(()=>balanceSpan.classList.remove('flash'),500);
                 updateFreeSpinsMsg(data.freeSpinsRemaining);
                 const finalGrid = data.grid;
                 const finalTranslateYs = [];
@@ -985,7 +984,6 @@
 
         // Initialize reels and start auth
         createReels();
-        // fetchState will be triggered by onAuthStateChanged
     </script>
 </body>
 </html>
