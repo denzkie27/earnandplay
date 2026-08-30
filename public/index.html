@@ -366,6 +366,10 @@
                 musicGainNode.gain.value = 0.15;
                 musicGainNode.connect(audioContext.destination);
             }
+            // Resume if suspended (e.g., browser policy)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
         }
 
         function playTone(frequency, duration, type = 'sine', volume = 0.3, when = 0) {
@@ -588,7 +592,6 @@
 
         // ===================== SPIN LOGIC (MODIFIED FOR AUTO-SPIN) =====================
         async function spin(isFreeSpin = false, callback = null) {
-            // Prevent double spins
             if (spinBtn.disabled && !isFreeSpin) return;
 
             spinBtn.disabled = true;
@@ -689,8 +692,8 @@
                     }
                     messageDiv.textContent = msg;
 
-                    // Enable buttons appropriately
-                    spinBtn.disabled = false;
+                    // --- FIX: Keep SPIN button disabled during auto-spin ---
+                    spinBtn.disabled = autoSpinning;
                     autoSpinBtn.disabled = autoSpinning;
                     stopBtn.disabled = !autoSpinning;
 
@@ -755,6 +758,7 @@
                 autoSpinTimer = null;
             }
             stopBtn.disabled = true;
+            // Note: buttons will be fully re-enabled after the current spin finishes via callback
         }
 
         // ===================== EVENT LISTENERS =====================
