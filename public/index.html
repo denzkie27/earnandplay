@@ -30,7 +30,6 @@
             position: relative;
             transition: box-shadow 0.3s, border-color 0.3s;
         }
-        /* Win animation for game container */
         .game-container.win-animation {
             animation: containerWin 0.6s ease-in-out 3;
         }
@@ -95,7 +94,6 @@
             top: 0;
             left: 0;
             width: 100%;
-            /* transition set dynamically by JS */
         }
         .reel-cell {
             height: 120px;
@@ -118,7 +116,6 @@
             from { box-shadow: 0 0 8px #f1c40f; }
             to { box-shadow: 0 0 25px #f39c12; }
         }
-        /* Reel bounce on stop */
         .reel-column.bounce {
             animation: bounce 0.3s ease-in-out;
         }
@@ -166,7 +163,6 @@
             color: #bbb;
             margin: 10px 0;
         }
-        /* Balance flash */
         .balance.flash {
             animation: flash 0.5s ease;
         }
@@ -175,7 +171,6 @@
             50% { color: #f1c40f; }
             100% { color: #fff; }
         }
-        /* Confetti container */
         #confetti-container {
             position: fixed;
             top: 0;
@@ -196,7 +191,6 @@
             0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
-        /* Music toggle button */
         .music-btn {
             position: absolute;
             top: 10px;
@@ -211,11 +205,7 @@
             opacity: 0.7;
             transition: opacity 0.2s, background 0.2s;
         }
-        .music-btn:hover {
-            opacity: 1;
-            background: #555;
-        }
-        /* WIN overlay banner */
+        .music-btn:hover { opacity: 1; background: #555; }
         .win-overlay {
             position: absolute;
             top: 50%;
@@ -225,16 +215,43 @@
             color: #f1c40f;
             padding: 20px 40px;
             border-radius: 20px;
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: bold;
             pointer-events: none;
-            z-index: 10;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .win-overlay.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
             animation: popIn 0.5s forwards;
         }
         @keyframes popIn {
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
             70% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .total-win-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: #2ecc71;
+            padding: 30px 50px;
+            border-radius: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            z-index: 1000;
+            text-align: center;
+            pointer-events: none;
+            animation: totalWinPop 0.5s ease-out;
+        }
+        @keyframes totalWinPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            80% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
     </style>
 </head>
@@ -252,7 +269,6 @@
         <div class="message" id="message"></div>
         <div class="free-spins-msg" id="freeSpinsMsg"></div>
         <div class="scatter-info">⭐ = Scatter | 3⭐ = 5x + 5 spins | 4⭐ = 10x + 10 spins | 5⭐ = 50x + 20 spins | 6⭐ = 100x + 30 spins | 7⭐ = 200x + 50 spins</div>
-        <!-- Win overlay element -->
         <div class="win-overlay" id="winOverlay"></div>
     </div>
     <div id="confetti-container"></div>
@@ -299,6 +315,7 @@
         let audioContext = null;
         let musicGainNode = null;
         let musicPlaying = false;
+        let freeSpinTotalWin = 0; // accumulate winnings from free spins
 
         function initAudio() {
             if (!audioContext) {
@@ -332,7 +349,6 @@
             playTone(800, 0.05, 'square', 0.2);
         }
 
-        // Enhanced win sound: a quick ascending arpeggio
         function playWinSound() {
             const notes = [523, 659, 784, 1046];
             notes.forEach((freq, i) => {
@@ -346,7 +362,36 @@
             setTimeout(() => playTone(600, 0.2, 'triangle', 0.3), 300);
         }
 
-        // ----- Background Music Loop -----
+        // Synthetic applause: series of short noise bursts
+        function playApplause() {
+            initAudio();
+            const duration = 0.8;
+            const now = audioContext.currentTime;
+            const bufferSize = audioContext.sampleRate * duration;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            // Generate noise bursts (claps) at intervals
+            const clapCount = 8;
+            const clapLength = Math.floor(bufferSize / clapCount);
+            for (let i = 0; i < bufferSize; i++) {
+                const inClap = Math.floor(i / clapLength) % 2 === 0; // alternate claps
+                if (inClap) {
+                    data[i] = (Math.random() * 2 - 1) * 0.4;
+                } else {
+                    data[i] = 0;
+                }
+            }
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            const gainNode = audioContext.createGain();
+            gainNode.gain.setValueAtTime(0.3, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            source.start(now);
+        }
+
+        // Background music
         function startMusic() {
             initAudio();
             if (musicPlaying) return;
@@ -485,15 +530,22 @@
         }
 
         // ===================== WIN OVERLAY =====================
-        function showWinOverlay(amount) {
-            winOverlay.textContent = `WIN $${amount}!`;
-            winOverlay.style.animation = 'none';
-            void winOverlay.offsetHeight; // reflow
-            winOverlay.style.animation = 'popIn 0.5s forwards';
+        function showWinOverlay(message, duration = 2000) {
+            winOverlay.textContent = message;
+            winOverlay.classList.add('show');
             setTimeout(() => {
-                winOverlay.style.animation = '';
+                winOverlay.classList.remove('show');
                 winOverlay.textContent = '';
-            }, 2000);
+            }, duration);
+        }
+
+        // Show total winnings from free spins (fixed overlay)
+        function showTotalWinOverlay(amount) {
+            const overlay = document.createElement('div');
+            overlay.className = 'total-win-overlay';
+            overlay.innerHTML = `🎉 Free spins completed!<br>Total Won: $${amount}`;
+            document.body.appendChild(overlay);
+            setTimeout(() => overlay.remove(), 3000);
         }
 
         // ===================== SPIN LOGIC =====================
@@ -518,7 +570,7 @@
                     return;
                 }
 
-                // Update balance display with flash
+                // Update balance display
                 balanceValueSpan.textContent = data.newBalance;
                 betInput.max = data.newBalance;
                 balanceSpan.classList.add('flash');
@@ -533,7 +585,7 @@
                     finalTranslateYs.push(translateY);
                 }
 
-                // ----- REALISTIC ANIMATION WITH OVERSHOOT -----
+                // Animate reels with overshoot
                 reelStrips.forEach((strip, col) => {
                     strip.style.transition = 'none';
                     strip.style.transform = `translateY(-${STRIP_LENGTH * CELL_HEIGHT}px)`;
@@ -556,32 +608,40 @@
                     }, settleStart);
                 });
 
+                // Reel stop sounds and bounce
                 for (let col = 0; col < REEL_COUNT; col++) {
                     const stopDelay = (1.2 + col * 0.15) * 1000;
                     setTimeout(() => {
                         playReelStop();
                         reelColumns[col].classList.add('bounce');
                         setTimeout(() => reelColumns[col].classList.remove('bounce'), 300);
+                        // If it's a free spin, play applause at each reel stop
+                        if (isFreeSpin) {
+                            playApplause();
+                        }
                     }, stopDelay);
                 }
 
+                // Process result after all reels stop
                 const maxEndTime = 1.2 + (REEL_COUNT - 1) * 0.15 + 0.2;
                 setTimeout(() => {
                     reelStrips.forEach(strip => strip.style.transition = 'none');
+
+                    // Handle free spin total accumulation
+                    if (isFreeSpin) {
+                        freeSpinTotalWin += data.winAmount || 0;
+                    }
+
                     if (data.scatters >= 3) {
-                        // Highlight winning scatters
                         highlightScatters(finalGrid, finalTranslateYs);
-                        // Play win sound
                         playWinSound();
-                        // Show win overlay
-                        showWinOverlay(data.winAmount);
-                        // Add container animation
+                        showWinOverlay(`WIN $${data.winAmount}!`);
                         gameContainer.classList.add('win-animation');
                         setTimeout(() => gameContainer.classList.remove('win-animation'), 1800);
-                        // Spawn confetti (more for bigger wins)
                         const confettiCount = data.scatters >= 5 ? 100 : 50;
                         spawnConfetti(confettiCount);
                     }
+
                     let msg = "";
                     if (data.scatters >= 3) {
                         msg = `✨ ${data.scatters} scatters! You win $${data.winAmount}`;
@@ -596,8 +656,13 @@
 
                     spinBtn.disabled = false;
 
+                    // If free spins remain, schedule next free spin
                     if (data.freeSpinsRemaining > 0) {
                         setTimeout(() => spin(true), 1500);
+                    } else if (isFreeSpin && data.freeSpinsRemaining === 0) {
+                        // This was the last free spin; show total winnings
+                        showTotalWinOverlay(freeSpinTotalWin);
+                        freeSpinTotalWin = 0; // reset for next round
                     }
                 }, maxEndTime * 1000 + 100);
 
