@@ -179,6 +179,24 @@
             gap: 10px;
             margin: 15px 0;
             flex-wrap: wrap;
+            align-items: center;
+        }
+        .auto-spin-count {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #fff;
+        }
+        .auto-spin-count input {
+            width: 60px;
+            padding: 8px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            background: #fff;
+            color: #333;
+            font-weight: bold;
         }
         .message {
             min-height: 50px;
@@ -301,6 +319,10 @@
         <div class="reels-container" id="reelsContainer"></div>
         <div class="button-row">
             <button class="spin-btn" id="spinBtn">SPIN</button>
+            <div class="auto-spin-count">
+                <label for="autoSpinCount">Times:</label>
+                <input type="number" id="autoSpinCount" value="5" min="1" max="100" step="1">
+            </div>
             <button class="auto-spin-btn" id="autoSpinBtn">AUTO SPIN</button>
             <button class="stop-btn" id="stopBtn" disabled>STOP</button>
         </div>
@@ -341,6 +363,7 @@
         const spinBtn = document.getElementById('spinBtn');
         const autoSpinBtn = document.getElementById('autoSpinBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const autoSpinCountInput = document.getElementById('autoSpinCount');
         const messageDiv = document.getElementById('message');
         const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
         const reelsContainer = document.getElementById('reelsContainer');
@@ -357,6 +380,7 @@
         let musicPlaying = false;
         let freeSpinTotalWin = 0;
         let autoSpinning = false;
+        let autoSpinsRemaining = 0;
         let autoSpinTimer = null;
 
         function initAudio() {
@@ -366,7 +390,6 @@
                 musicGainNode.gain.value = 0.15;
                 musicGainNode.connect(audioContext.destination);
             }
-            // Resume if suspended (e.g., browser policy)
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
@@ -592,7 +615,8 @@
 
         // ===================== SPIN LOGIC (MODIFIED FOR AUTO-SPIN) =====================
         async function spin(isFreeSpin = false, callback = null) {
-            if (spinBtn.disabled && !isFreeSpin) return;
+            // Allow auto-spin even if spinBtn is disabled, but block manual double-spins
+            if (spinBtn.disabled && !isFreeSpin && !autoSpinning) return;
 
             spinBtn.disabled = true;
             autoSpinBtn.disabled = true;
@@ -692,11 +716,12 @@
                     }
                     messageDiv.textContent = msg;
 
-                    // --- FIX: Keep SPIN button disabled during auto-spin ---
+                    // Button state for auto-spin
                     spinBtn.disabled = autoSpinning;
                     autoSpinBtn.disabled = autoSpinning;
                     stopBtn.disabled = !autoSpinning;
 
+                    // Handle free spins first
                     if (data.freeSpinsRemaining > 0) {
                         setTimeout(() => spin(true, callback), 1500);
                     } else {
@@ -721,20 +746,50 @@
         // ===================== AUTO-SPIN LOGIC =====================
         function startAutoSpin() {
             if (autoSpinning) return;
+
+            const count = parseInt(autoSpinCountInput.value);
+            if (isNaN(count) || count < 1) {
+                messageDiv.textContent = "Please enter a valid number of spins.";
+                return;
+            }
+
             autoSpinning = true;
+            autoSpinsRemaining = count;
             autoSpinBtn.disabled = true;
             stopBtn.disabled = false;
             spinBtn.disabled = true;
+            autoSpinCountInput.disabled = true;
+
+            // Start first spin with callback
             spin(false, autoSpinCallback);
         }
 
         function autoSpinCallback() {
             if (!autoSpinning) {
+                // Stopped manually
                 spinBtn.disabled = false;
                 autoSpinBtn.disabled = false;
                 stopBtn.disabled = true;
+                autoSpinCountInput.disabled = false;
                 return;
             }
+
+            // Check if we still have spins left
+            if (autoSpinsRemaining <= 1) {
+                // This was the last spin
+                autoSpinsRemaining = 0;
+                autoSpinning = false;
+                spinBtn.disabled = false;
+                autoSpinBtn.disabled = false;
+                stopBtn.disabled = true;
+                autoSpinCountInput.disabled = false;
+                messageDiv.textContent = "Auto spin completed.";
+                return;
+            }
+
+            autoSpinsRemaining--;
+
+            // Check balance
             const currentBalance = parseInt(balanceValueSpan.textContent);
             const bet = parseInt(betInput.value);
             if (currentBalance < bet || bet < 1) {
@@ -742,9 +797,12 @@
                 spinBtn.disabled = false;
                 autoSpinBtn.disabled = false;
                 stopBtn.disabled = true;
+                autoSpinCountInput.disabled = false;
                 messageDiv.textContent = "Auto spin stopped: insufficient balance.";
                 return;
             }
+
+            // Schedule next spin after a short delay
             autoSpinTimer = setTimeout(() => {
                 spin(false, autoSpinCallback);
             }, 1500);
@@ -758,7 +816,8 @@
                 autoSpinTimer = null;
             }
             stopBtn.disabled = true;
-            // Note: buttons will be fully re-enabled after the current spin finishes via callback
+            autoSpinCountInput.disabled = false;
+            // Buttons will be fully re-enabled after current spin ends (in callback)
         }
 
         // ===================== EVENT LISTENERS =====================
