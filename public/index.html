@@ -49,6 +49,10 @@
         .balance {
             font-size: 1.4em;
             margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .bet-control {
             display: flex;
@@ -57,7 +61,12 @@
             gap: 10px;
             margin: 15px 0;
         }
-        .bet-control label { font-size: 1.2em; }
+        .bet-control label {
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
         .bet-control input {
             width: 80px;
             padding: 10px;
@@ -305,15 +314,48 @@
             80% { transform: translate(-50%, -50%) scale(1.1); }
             100% { transform: translate(-50%, -50%) scale(1); }
         }
+
+        /* Coin SVG styling */
+        .coin-svg {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .coin-svg-big {
+            width: 32px;
+            height: 32px;
+        }
+        .coin-svg-small {
+            width: 14px;
+            height: 14px;
+        }
     </style>
 </head>
 <body>
     <div class="game-container" id="gameContainer">
         <button class="music-btn" id="musicBtn" title="Toggle music">🔊</button>
         <h1>🎰 SCATTER SLOTS</h1>
-        <div class="balance" id="balance">💰 Balance: <span class="material-icons" style="font-size: 1em;">paid</span><span id="balanceValue">0</span></div>
+        <div class="balance" id="balance">
+            <span>💰 Balance:</span>
+            <!-- Coin SVG -->
+            <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+                <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+                <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+            </svg>
+            <span id="balanceValue">0</span>
+        </div>
         <div class="bet-control">
-            <label for="bet">Bet: <span class="material-icons" style="font-size: 1em;">paid</span></label>
+            <label for="bet">
+                <span>Bet:</span>
+                <!-- Coin SVG -->
+                <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+                </svg>
+            </label>
             <input type="number" id="bet" value="1" min="1" max="100">
         </div>
         <div class="reels-container" id="reelsContainer"></div>
@@ -597,23 +639,31 @@
 
         // ===================== WIN OVERLAY =====================
         function showWinOverlay(message, duration = 2000) {
-            winOverlay.innerHTML = message;
+            winOverlay.innerHTML = message;  // Use innerHTML to support SVG
             winOverlay.classList.add('show');
             setTimeout(() => {
                 winOverlay.classList.remove('show');
-                winOverlay.textContent = '';
+                winOverlay.innerHTML = '';
             }, duration);
         }
 
         function showTotalWinOverlay(amount) {
             const overlay = document.createElement('div');
             overlay.className = 'total-win-overlay';
-            overlay.innerHTML = `🎉 Free spins completed!<br>Total Won: <span class="material-icons" style="font-size:1em;">paid</span>${amount}`;
+            overlay.innerHTML = `
+                🎉 Free spins completed!<br>Total Won: 
+                <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                    <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+                </svg>
+                ${amount}
+            `;
             document.body.appendChild(overlay);
             setTimeout(() => overlay.remove(), 3000);
         }
 
-        // ===================== SPIN LOGIC (MODIFIED FOR AUTO-SPIN) =====================
+        // ===================== SPIN LOGIC =====================
         async function spin(isFreeSpin = false, callback = null) {
             if (spinBtn.disabled && !isFreeSpin && !autoSpinning) return;
 
@@ -696,7 +746,15 @@
                     if (data.scatters >= 3) {
                         highlightScatters(finalGrid, finalTranslateYs);
                         playWinSound();
-                        showWinOverlay(`WIN <span class="material-icons" style="font-size:1em;">paid</span>${data.winAmount}!`);
+                        showWinOverlay(`
+                            WIN 
+                            <svg class="coin-svg coin-svg-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                                <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
+                                <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
+                                <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
+                            </svg>
+                            ${data.winAmount}!
+                        `);
                         gameContainer.classList.add('win-animation');
                         setTimeout(() => gameContainer.classList.remove('win-animation'), 1800);
                         const confettiCount = data.scatters >= 5 ? 100 : 50;
@@ -705,7 +763,7 @@
 
                     let msg = "";
                     if (data.scatters >= 3) {
-                        msg = `✨ ${data.scatters} scatters! You win <span class="material-icons" style="font-size:1em;">paid</span>${data.winAmount}`;
+                        msg = `✨ ${data.scatters} scatters! You win 🪙${data.winAmount}`;
                         if (data.freeSpinsAwarded > 0) {
                             msg += ` + ${data.freeSpinsAwarded} free spins!`;
                             playFreeSpinsSound();
@@ -713,7 +771,7 @@
                     } else {
                         msg = "No scatter win. Try again!";
                     }
-                    messageDiv.textContent = msg;
+                    messageDiv.innerHTML = msg;
 
                     spinBtn.disabled = autoSpinning;
                     autoSpinBtn.disabled = autoSpinning;
