@@ -1,3 +1,6 @@
+Below is the updated index.html with larger grid boxes that better resemble a real scatter slot game. I've increased the reel column width/height and the symbol size, while keeping all existing functionality (Firebase sync, sounds, animations, auto-spin, etc.) intact.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -213,7 +216,7 @@
 
         /* ========== CONTAINER & CARD ========== */
         .container {
-            max-width: 750px;
+            max-width: 900px; /* Increased from 750px */
             margin: 0 auto;
             padding: 30px 16px 40px;
         }
@@ -246,7 +249,7 @@
             100% { box-shadow: 0 20px 60px rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.08); }
         }
 
-        /* ========== SLOT SPECIFIC STYLES ========== */
+        /* ========== SLOT SPECIFIC STYLES (LARGER GRID) ========== */
         .slot-title {
             text-align: center;
             font-size: 28px;
@@ -292,17 +295,17 @@
         .reels-container {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 15px; /* Increased gap */
             margin: 20px 0;
             background: #0f151a;
-            padding: 12px;
+            padding: 20px; /* Increased padding */
             border-radius: 15px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
             position: relative;
         }
         .reel-column {
-            width: 100px;
-            height: 300px;
+            width: 140px; /* Increased from 100px */
+            height: 420px; /* Increased from 300px (3 x 140px) */
             overflow: hidden;
             position: relative;
             border-radius: 8px;
@@ -316,7 +319,7 @@
             width: 100%;
         }
         .reel-cell {
-            height: 100px;
+            height: 140px; /* Increased from 100px */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -325,7 +328,7 @@
             user-select: none;
         }
         .reel-cell .material-icons {
-            font-size: 60px;
+            font-size: 80px; /* Increased from 60px */
             color: inherit;
         }
         .reel-cell.win {
@@ -528,6 +531,40 @@
         .coin-svg { width: 20px; height: 20px; display: inline-block; flex-shrink: 0; }
         .coin-svg-big { width: 32px; height: 32px; }
         .coin-svg-small { width: 14px; height: 14px; }
+
+        /* Responsive adjustments for larger reels */
+        @media(max-width: 768px) {
+            .reel-column {
+                width: 90px;
+                height: 270px;
+            }
+            .reel-cell {
+                height: 90px;
+            }
+            .reel-cell .material-icons {
+                font-size: 60px;
+            }
+            .reels-container {
+                gap: 10px;
+                padding: 15px;
+            }
+        }
+        @media(max-width: 480px) {
+            .reel-column {
+                width: 70px;
+                height: 210px;
+            }
+            .reel-cell {
+                height: 70px;
+            }
+            .reel-cell .material-icons {
+                font-size: 45px;
+            }
+            .reels-container {
+                gap: 8px;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -667,7 +704,7 @@
             { icon: 'music_note',color: '#e91e63' }
         ];
         const SCATTER_ICON = 'star';
-        const CELL_HEIGHT = 100;
+        const CELL_HEIGHT = 140; // Must match CSS .reel-cell height
         const VISIBLE_ROWS = 3;
         const REEL_COUNT = 5;
         const STRIP_LENGTH = 40;
@@ -817,7 +854,6 @@
             });
         }
 
-        // NEW: Update Firebase balance after each spin
         async function updateFirebaseBalance(newBalance) {
             const user = firebaseAuth.currentUser;
             if (!user) return;
@@ -991,3 +1027,17 @@
     </script>
 </body>
 </html>
+```
+
+---
+
+✅ Key Changes for Larger Grid
+
+· Reel columns: width 140px (was 100px), height 420px (was 300px).
+· Reel cells: height 140px (was 100px).
+· Symbol size: 80px (was 60px).
+· Gap between reels: 15px (was 10px).
+· Container width: increased to 900px to accommodate the larger reels.
+· Responsive adjustments for tablets and phones.
+
+The reels now look more like a real scatter slot machine with bigger boxes and larger symbols. All other features remain unchanged.
