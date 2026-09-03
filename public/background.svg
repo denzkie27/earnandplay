@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <!-- Base gradient -->
+    <radialGradient id="glow" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1a1a2e" />
+      <stop offset="40%" stop-color="#0f0f1a" />
+      <stop offset="100%" stop-color="#050508" />
+    </radialGradient>
+    <!-- Gold glow -->
+    <radialGradient id="goldGlow" cx="50%" cy="45%" r="30%">
+      <stop offset="0%" stop-color="rgba(241,196,15,0.15)" />
+      <stop offset="100%" stop-color="rgba(241,196,15,0)" />
+    </radialGradient>
+    <!-- Animal silhouette (lion) -->
+    <path id="lion" d="M50,80 L60,60 L75,70 L85,55 L95,65 L105,50 L115,65 L125,55 L135,70 L145,60 L155,80 L145,90 L135,85 L125,95 L115,90 L105,100 L95,90 L85,95 L75,85 L65,90 L55,80 Z" fill="rgba(255,255,255,0.03)" />
+    <!-- Other simple shapes -->
+    <circle id="tiger" cx="70" cy="70" r="40" fill="rgba(255,255,255,0.02)" />
+  </defs>
+  <!-- Base background -->
+  <rect width="1080" height="1920" fill="url(#glow)" />
+  <!-- Gold glow -->
+  <rect width="1080" height="1920" fill="url(#goldGlow)" />
+  <!-- Animal silhouettes scattered -->
+  <use href="#lion" x="200" y="300" transform="scale(2)" opacity="0.5" />
+  <use href="#tiger" x="700" y="800" transform="scale(1.5)" opacity="0.4" />
+  <use href="#lion" x="500" y="1200" transform="scale(1.8) rotate(30)" opacity="0.3" />
+  <use href="#tiger" x="300" y="1600" transform="scale(1.2)" opacity="0.3" />
+  <!-- Vignette overlay -->
+  <rect width="1080" height="1920" fill="url(#vignette)" />
+  <defs>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
+      <stop offset="60%" stop-color="rgba(0,0,0,0)" />
+      <stop offset="100%" stop-color="rgba(0,0,0,0.6)" />
+    </radialGradient>
+  </defs>
+</svg>
