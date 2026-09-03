@@ -1,11 +1,10 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// ===================== MIDDLEWARE =====================
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -14,9 +13,7 @@ app.use(session({
     secret: 'scatter-slot-secret-key',
     resave: false,
     saveUninitialized: true,
-    cookie: {
-        maxAge: 24 * 60 * 60 * 1000
-    }
+    cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 // ===================== GAME CONFIG =====================
@@ -24,7 +21,6 @@ app.use(session({
 const SYMBOLS = [
     { id: 'scatter', image: '/images/scatter.png', isScatter: true, isWild: false },
     { id: 'wild', image: '/images/wild.png', isScatter: false, isWild: true },
-
     { id: 'lion', image: '/images/lion.png' },
     { id: 'tiger', image: '/images/tiger.png' },
     { id: 'badger', image: '/images/badger.png' },
@@ -52,90 +48,61 @@ const SYMBOLS = [
     { id: 'wolf', image: '/images/wolf.png' }
 ];
 
-const REGULAR_SYMBOLS = SYMBOLS.filter(symbol => !symbol.isScatter && !symbol.isWild);
-
+const REGULAR_SYMBOLS = SYMBOLS.filter(s => !s.isScatter && !s.isWild);
 const VISIBLE_ROWS = 5;
 const REEL_COUNT = 5;
 
-const MULTIPLIER_SEQUENCE = [1, 2, 4, 6, 10];
+// Multiplier sequence: 1x, 2x, 3x, 4x, 6x, 10x
+const MULTIPLIER_SEQUENCE = [1, 2, 3, 4, 6, 10];
 
 const SCATTER_PAYOUT = 2;
 const FREE_SPINS_AMOUNT = 10;
 const SCATTER_COOLDOWN_SPINS = 10;
 
-// ===================== PAYOUT =====================
-
 function getClusterPayout(count) {
-    // 5 of a kind = 50% of bet, 6 = 100%, 7 = 150%, etc.
-    if (count < 5) return 0;
-    return (count - 4) * 0.5;
+    if (count === 5 || count === 6) return 0.5;
+    if (count === 7) return 1.0;
+    if (count >= 8) return 2.0;
+    return 0;
 }
-
-// ===================== SESSION =====================
 
 function initGame(req) {
     if (typeof req.session.balance !== 'number') req.session.balance = 1000;
     if (typeof req.session.freeSpins !== 'number') req.session.freeSpins = 0;
     if (typeof req.session.lastBet !== 'number') req.session.lastBet = 1;
-    if (
-        typeof req.session.multiplierIndex !== 'number' ||
-        req.session.multiplierIndex < 0 ||
-        req.session.multiplierIndex >= MULTIPLIER_SEQUENCE.length
-    ) {
-        req.session.multiplierIndex = 0;
+    if (typeof req.session.multiplierIndex !== 'number' ||
+        req.session.multiplierIndex < -1 ||
+        req.session.multiplierIndex >= MULTIPLIER_SEQUENCE.length) {
+        req.session.multiplierIndex = -1;   // -1 = no multiplier
     }
     if (typeof req.session.scatterCooldown !== 'number') req.session.scatterCooldown = 0;
+    if (typeof req.session.freeSpinAccumulator !== 'number') req.session.freeSpinAccumulator = 0;
 }
-
-// ===================== RANDOM SYMBOL =====================
 
 function randomSymbol({ allowScatter = true, allowWild = true } = {}) {
     const rand = Math.random();
-
-    if (allowScatter && rand < 0.05) {
-        return SYMBOLS.find(symbol => symbol.isScatter);
-    }
-
-    if (allowWild && rand < 0.15) {
-        return SYMBOLS.find(symbol => symbol.isWild);
-    }
-
+    if (allowScatter && rand < 0.05) return SYMBOLS.find(s => s.isScatter);
+    if (allowWild && rand < 0.08) return SYMBOLS.find(s => s.isWild);
     return REGULAR_SYMBOLS[Math.floor(Math.random() * REGULAR_SYMBOLS.length)];
 }
 
-// ===================== GENERATE GRID =====================
-
-// Generates a grid that guarantees at least one winning combination (5 of a kind)
 function generateWinningGrid(allowScatter = true) {
     const grid = [];
-    let scatterCount = 0;
-    let wildCount = 0;
-
-    // Choose a random regular symbol to be the winner
+    let scatterCount = 0, wildCount = 0;
     const winSymbol = REGULAR_SYMBOLS[Math.floor(Math.random() * REGULAR_SYMBOLS.length)];
-
-    // Reserve 5 cells for the winning symbol; place them randomly
     const totalCells = REEL_COUNT * VISIBLE_ROWS;
     const winningPositions = [];
     while (winningPositions.length < 5) {
         const pos = Math.floor(Math.random() * totalCells);
-        if (!winningPositions.includes(pos)) {
-            winningPositions.push(pos);
-        }
+        if (!winningPositions.includes(pos)) winningPositions.push(pos);
     }
-
-    // Fill the grid cell by cell
     for (let i = 0; i < totalCells; i++) {
         const col = Math.floor(i / VISIBLE_ROWS);
         const row = i % VISIBLE_ROWS;
-
         if (!grid[col]) grid[col] = [];
-
         if (winningPositions.includes(i)) {
-            // Place the winning symbol
             grid[col][row] = winSymbol;
         } else {
-            // Place random symbol respecting limits
             const symbol = randomSymbol({
                 allowScatter: allowScatter && scatterCount < 3,
                 allowWild: wildCount < 3
@@ -145,36 +112,27 @@ function generateWinningGrid(allowScatter = true) {
             grid[col][row] = symbol;
         }
     }
-
     return grid;
 }
 
-// Generates a grid that guarantees NO winning combination (each regular symbol appears at most once)
 function generateLosingGrid(allowScatter = true) {
     const grid = [];
-    let scatterCount = 0;
-    let wildCount = 0;
-
-    // We'll fill with unique regular symbols (max one per symbol)
+    let scatterCount = 0, wildCount = 0;
     const usedRegular = new Set();
-
     for (let col = 0; col < REEL_COUNT; col++) {
         grid[col] = [];
         for (let row = 0; row < VISIBLE_ROWS; row++) {
-            // Decide if we should place a scatter or wild (respecting limits)
             let placedSpecial = false;
             if (allowScatter && scatterCount < 3 && Math.random() < 0.05) {
                 grid[col][row] = SYMBOLS.find(s => s.isScatter);
                 scatterCount++;
                 placedSpecial = true;
-            } else if (wildCount < 3 && Math.random() < 0.15) {
+            } else if (wildCount < 3 && Math.random() < 0.08) {
                 grid[col][row] = SYMBOLS.find(s => s.isWild);
                 wildCount++;
                 placedSpecial = true;
             }
-
             if (!placedSpecial) {
-                // Pick a regular symbol that hasn't been used yet
                 let symbol;
                 do {
                     symbol = REGULAR_SYMBOLS[Math.floor(Math.random() * REGULAR_SYMBOLS.length)];
@@ -184,86 +142,38 @@ function generateLosingGrid(allowScatter = true) {
             }
         }
     }
-
     return grid;
 }
 
-// Main grid generation: chooses based on forceWin flag
-function generateGrid(allowScatter = true, forceWin = null) {
-    if (forceWin === true) {
-        return generateWinningGrid(allowScatter);
-    } else if (forceWin === false) {
-        return generateLosingGrid(allowScatter);
-    } else {
-        // Random grid (legacy, not used now but kept for completeness)
-        const grid = [];
-        let scatterCount = 0;
-        let wildCount = 0;
-        for (let col = 0; col < REEL_COUNT; col++) {
-            grid[col] = [];
-            for (let row = 0; row < VISIBLE_ROWS; row++) {
-                const symbol = randomSymbol({
-                    allowScatter: allowScatter && scatterCount < 3,
-                    allowWild: wildCount < 3
-                });
-                if (symbol.isScatter) scatterCount++;
-                if (symbol.isWild) wildCount++;
-                grid[col][row] = symbol;
-            }
-        }
-        return grid;
-    }
-}
-
-// ===================== COUNT SCATTERS =====================
-
 function countScatters(grid) {
     let count = 0;
-    for (const column of grid) {
-        for (const symbol of column) {
-            if (symbol.isScatter) count++;
-        }
-    }
+    for (const col of grid) for (const sym of col) if (sym.isScatter) count++;
     return count;
 }
-
-// ===================== DETECT WINS =====================
 
 function detectWins(grid) {
     const wildPositions = [];
     const symbolCounts = {};
     const symbolPositions = {};
-
-    REGULAR_SYMBOLS.forEach(symbol => {
-        symbolCounts[symbol.id] = 0;
-        symbolPositions[symbol.id] = [];
-    });
-
-    for (let column = 0; column < REEL_COUNT; column++) {
+    REGULAR_SYMBOLS.forEach(s => { symbolCounts[s.id] = 0; symbolPositions[s.id] = []; });
+    for (let col = 0; col < REEL_COUNT; col++) {
         for (let row = 0; row < VISIBLE_ROWS; row++) {
-            const symbol = grid[column][row];
-            if (symbol.isWild) {
-                wildPositions.push({ col: column, row: row });
-            } else if (!symbol.isScatter) {
-                symbolCounts[symbol.id]++;
-                symbolPositions[symbol.id].push({ col: column, row: row });
+            const sym = grid[col][row];
+            if (sym.isWild) wildPositions.push({ col, row });
+            else if (!sym.isScatter) {
+                symbolCounts[sym.id]++;
+                symbolPositions[sym.id].push({ col, row });
             }
         }
     }
-
     const wins = [];
     let availableWilds = wildPositions.slice();
-
-    // Sort symbols from highest count to lowest
-    const symbolIds = Object.keys(symbolCounts).sort((a, b) => symbolCounts[b] - symbolCounts[a]);
-
-    // First pass: try to form wins with 5 or more symbols
+    const symbolIds = Object.keys(symbolCounts).sort((a,b)=>symbolCounts[b]-symbolCounts[a]);
     for (const id of symbolIds) {
         const baseCount = symbolCounts[id];
-
         if (baseCount >= 5) {
             wins.push({
-                symbol: REGULAR_SYMBOLS.find(s => s.id === id),
+                symbol: REGULAR_SYMBOLS.find(s=>s.id===id),
                 count: baseCount,
                 positions: symbolPositions[id].slice(0, baseCount),
                 wildPositionsUsed: []
@@ -274,7 +184,7 @@ function detectWins(grid) {
                 const usedWilds = availableWilds.splice(0, neededWilds);
                 const totalCount = baseCount + neededWilds;
                 wins.push({
-                    symbol: REGULAR_SYMBOLS.find(s => s.id === id),
+                    symbol: REGULAR_SYMBOLS.find(s=>s.id===id),
                     count: totalCount,
                     positions: symbolPositions[id].concat(usedWilds).slice(0, totalCount),
                     wildPositionsUsed: usedWilds
@@ -282,52 +192,54 @@ function detectWins(grid) {
             }
         }
     }
-
-    // Second pass: add remaining wilds to strongest win
     if (availableWilds.length > 0 && wins.length > 0) {
-        wins.sort((a, b) => b.count - a.count);
-        const bestWin = wins[0];
-        bestWin.count += availableWilds.length;
-        bestWin.positions.push(...availableWilds);
-        bestWin.wildPositionsUsed.push(...availableWilds);
+        wins.sort((a,b)=>b.count-a.count);
+        const best = wins[0];
+        best.count += availableWilds.length;
+        best.positions.push(...availableWilds);
+        best.wildPositionsUsed.push(...availableWilds);
     }
-
     return wins;
 }
 
-// ===================== EVALUATE SPIN =====================
-
 function evaluateSpin(grid, bet, gameSession) {
+    const clusterWins = detectWins(grid);
+    const scatterCount = countScatters(grid);
+    const hasWin = clusterWins.length > 0 || scatterCount >= 3;
+
+    let currentMultiplier;
+    if (hasWin) {
+        if (gameSession.multiplierIndex < MULTIPLIER_SEQUENCE.length - 1) {
+            gameSession.multiplierIndex++;
+        }
+        currentMultiplier = MULTIPLIER_SEQUENCE[gameSession.multiplierIndex];
+    } else {
+        gameSession.multiplierIndex = -1;
+        currentMultiplier = 0;
+    }
+
     let totalWin = 0;
     const wins = [];
     let freeSpinsAwarded = 0;
-
-    const currentMultiplier = MULTIPLIER_SEQUENCE[gameSession.multiplierIndex] || 1;
-
-    const clusterWins = detectWins(grid);
 
     for (const win of clusterWins) {
         const payout = getClusterPayout(win.count);
         const winAmount = Math.round(bet * payout * currentMultiplier);
         totalWin += winAmount;
-
         wins.push({
             symbol: win.symbol,
             count: win.count,
             positions: win.positions,
             wildPositionsUsed: win.wildPositionsUsed,
-            winAmount: winAmount,
+            winAmount,
             multiplier: currentMultiplier
         });
     }
-
-    const scatterCount = countScatters(grid);
 
     if (scatterCount >= 3) {
         const scatterWin = Math.round(bet * SCATTER_PAYOUT * currentMultiplier);
         totalWin += scatterWin;
         freeSpinsAwarded = FREE_SPINS_AMOUNT;
-
         wins.push({
             type: 'scatter',
             count: scatterCount,
@@ -337,18 +249,8 @@ function evaluateSpin(grid, bet, gameSession) {
         });
     }
 
-    totalWin = Math.round(Number(totalWin) || 0);
+    totalWin = Math.round(totalWin || 0);
 
-    if (totalWin > 0) {
-        gameSession.multiplierIndex = Math.min(
-            gameSession.multiplierIndex + 1,
-            MULTIPLIER_SEQUENCE.length - 1
-        );
-    } else {
-        gameSession.multiplierIndex = 0;
-    }
-
-    gameSession.balance += totalWin;
     gameSession.freeSpins += freeSpinsAwarded;
 
     return {
@@ -357,14 +259,11 @@ function evaluateSpin(grid, bet, gameSession) {
         wins,
         freeSpinsAwarded,
         scatters: scatterCount,
-        newBalance: gameSession.balance,
         freeSpinsRemaining: gameSession.freeSpins,
         multiplierUsed: currentMultiplier,
-        currentMultiplier: MULTIPLIER_SEQUENCE[gameSession.multiplierIndex] || 1
+        currentMultiplier: gameSession.multiplierIndex === -1 ? 0 : MULTIPLIER_SEQUENCE[gameSession.multiplierIndex]
     };
 }
-
-// ===================== ROUTES =====================
 
 app.get('/api/state', (req, res) => {
     initGame(req);
@@ -372,22 +271,19 @@ app.get('/api/state', (req, res) => {
         balance: req.session.balance,
         freeSpins: req.session.freeSpins,
         lastBet: req.session.lastBet,
-        multiplier: MULTIPLIER_SEQUENCE[req.session.multiplierIndex] || 1
+        multiplier: req.session.multiplierIndex === -1 ? 0 : MULTIPLIER_SEQUENCE[req.session.multiplierIndex]
     });
 });
 
 app.post('/api/spin', (req, res) => {
     initGame(req);
-
     if (req.session.scatterCooldown > 0) req.session.scatterCooldown--;
 
     const isFreeSpin = req.body.isFreeSpin === true;
     let betAmount = 0;
 
     if (isFreeSpin) {
-        if (req.session.freeSpins <= 0) {
-            return res.status(400).json({ error: 'No free spins available.' });
-        }
+        if (req.session.freeSpins <= 0) return res.status(400).json({ error: 'No free spins available.' });
         req.session.freeSpins--;
         betAmount = req.session.lastBet;
     } else {
@@ -400,16 +296,24 @@ app.post('/api/spin', (req, res) => {
     }
 
     const allowScatter = req.session.scatterCooldown <= 0;
+    const forceWin = Math.random() < 0.17;   // 17% regular win + scatter ~13% = 30% total
 
-    // ===== 50-50 win probability =====
-    const forceWin = Math.random() < 0.5;  // true = winning spin, false = losing spin
-    const grid = generateGrid(allowScatter, forceWin);
-
+    const grid = forceWin ? generateWinningGrid(allowScatter) : generateLosingGrid(allowScatter);
     const result = evaluateSpin(grid, betAmount, req.session);
 
-    if (result.freeSpinsAwarded > 0) {
-        req.session.scatterCooldown = SCATTER_COOLDOWN_SPINS;
+    let totalFreeSpinWin = undefined;
+    if (isFreeSpin) {
+        req.session.freeSpinAccumulator += result.totalWin;
+        if (req.session.freeSpins <= 0) {
+            totalFreeSpinWin = req.session.freeSpinAccumulator;
+            req.session.balance += totalFreeSpinWin;
+            req.session.freeSpinAccumulator = 0;
+        }
+    } else {
+        req.session.balance += result.totalWin;
     }
+
+    if (result.freeSpinsAwarded > 0) req.session.scatterCooldown = SCATTER_COOLDOWN_SPINS;
 
     res.json({
         grid: result.grid,
@@ -417,10 +321,11 @@ app.post('/api/spin', (req, res) => {
         wins: result.wins,
         freeSpinsAwarded: result.freeSpinsAwarded,
         scatters: result.scatters,
-        newBalance: result.newBalance,
+        newBalance: req.session.balance,
         freeSpinsRemaining: result.freeSpinsRemaining,
         multiplierUsed: result.multiplierUsed,
-        currentMultiplier: result.currentMultiplier
+        currentMultiplier: result.currentMultiplier,
+        totalFreeSpinWin
     });
 });
 
@@ -440,6 +345,4 @@ app.post('/api/sync-balance', (req, res) => {
     res.json({ newBalance: req.session.balance });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

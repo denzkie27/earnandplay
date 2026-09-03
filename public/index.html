@@ -45,6 +45,12 @@
         ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(229,9,20,0.4), rgba(255,122,0,0.4)); border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
         ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(229,9,20,0.7), rgba(255,122,0,0.7)); }
 
+        /* Remove blue focus outline */
+        *:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
         /* ===================== START SCREEN ===================== */
         #startScreen {
             position: fixed;
@@ -150,10 +156,10 @@
             min-height: 0;
             display: flex;
             flex-direction: column;
-            max-width: 700px;
+            max-width: 900px;
             width: 100%;
             margin: 0 auto;
-            padding: 8px;
+            padding: 20px;
             overflow: hidden;
         }
         .main-card {
@@ -161,9 +167,9 @@
             min-height: 0;
             background: rgba(17,17,17,0.85);
             border: 1px solid #2a2a2a;
-            border-radius: 16px;
-            padding: 8px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.8);
             position: relative;
             overflow: hidden;
             display: flex;
@@ -171,37 +177,37 @@
             justify-content: space-between;
         }
 
-        /* Premium container for title + multipliers */
+        /* Premium header container */
         .premium-header {
             background: linear-gradient(145deg, rgba(30,30,30,0.9), rgba(10,10,10,0.95));
             border: 1px solid rgba(201,168,76,0.4);
-            border-radius: 12px;
-            padding: 10px;
-            margin-bottom: 8px;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
             box-shadow: 0 0 20px rgba(201,168,76,0.2), inset 0 0 10px rgba(0,0,0,0.5);
             flex-shrink: 0;
         }
         .slot-title {
             text-align: center;
-            font-size: 22px;
+            font-size: 2em;
             font-weight: 900;
             color: #f1c40f;
             text-shadow: 0 0 20px rgba(241,196,15,0.5);
-            margin-bottom: 6px;
+            margin-bottom: 10px;
         }
         .multiplier-row {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 15px;
             flex-wrap: wrap;
         }
         .mult-badge {
             background: #2a2a2a;
             color: #aaa;
-            padding: 8px 14px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
             font-weight: bold;
-            font-size: 0.85em;
+            font-size: 1em;
             transition: all 0.3s;
             cursor: default;
             border: 1px solid #444;
@@ -216,25 +222,25 @@
         }
         @keyframes multPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-        /* Reels premium container */
+        /* Reels container */
         .reels-container {
-            flex: 1;
+            flex: 0 0 auto;
             min-height: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 5px;
-            margin: 0 0 8px 0;
-            padding: 6px;
-            border-radius: 16px;
+            gap: 10px;
+            margin: 0 0 20px 0;
+            padding: 10px;
+            border-radius: 20px;
             background: linear-gradient(145deg, #0a0a1a, #111);
-            border: 2px solid #c9a84c;
-            box-shadow: 0 0 20px rgba(201,168,76,0.4), inset 0 0 15px rgba(0,0,0,0.8);
+            border: 3px solid #c9a84c;
+            box-shadow: 0 0 30px rgba(201,168,76,0.4), inset 0 0 15px rgba(0,0,0,0.8);
             overflow: hidden;
         }
-        .reel-column { flex-shrink: 0; overflow: hidden; position: relative; border-radius: 8px; background: #111; box-shadow: 0 0 10px rgba(0,0,0,0.5), 0 0 6px rgba(201,168,76,0.2); contain: strict; border: 1px solid rgba(201,168,76,0.4); }
+        .reel-column { flex-shrink: 0; overflow: hidden; position: relative; border-radius: 10px; background: #111; box-shadow: 0 0 10px rgba(0,0,0,0.5), 0 0 6px rgba(201,168,76,0.2); contain: strict; border: 1px solid rgba(201,168,76,0.4); }
         .reel-strip { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; backface-visibility: hidden; transform: translateZ(0); }
-        .reel-cell { display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(201,168,76,0.3); background: #1a1a1a; user-select: none; padding: 3px; transition: background 0.3s; }
+        .reel-cell { display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(201,168,76,0.3); background: #1a1a1a; user-select: none; padding: 5px; transition: background 0.3s; }
         .reel-cell img { width: 100%; height: 100%; object-fit: contain; border-radius: 3px; filter: brightness(0.95); draggable: false; }
 
         .reel-cell.win {
@@ -268,12 +274,12 @@
         .reel-column.stopping { animation: hardStop 0.15s ease-out; }
         @keyframes hardStop { 0% { transform: translateY(0); } 30% { transform: translateY(-12px); } 60% { transform: translateY(5px); } 100% { transform: translateY(0); } }
 
-        /* Premium footer container for buttons and bet */
+        /* Premium footer container */
         .premium-footer {
             background: linear-gradient(145deg, rgba(30,30,30,0.9), rgba(10,10,10,0.95));
             border: 1px solid rgba(201,168,76,0.4);
-            border-radius: 12px;
-            padding: 10px;
+            border-radius: 16px;
+            padding: 20px;
             box-shadow: 0 0 20px rgba(201,168,76,0.2), inset 0 0 10px rgba(0,0,0,0.5);
             flex-shrink: 0;
         }
@@ -281,19 +287,34 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 6px;
+            gap: 15px;
             flex-wrap: wrap;
         }
-        .button-left { display: flex; gap: 6px; }
-        .button-center { flex: 1; display: flex; justify-content: center; }
-        .button-right { display: flex; align-items: center; gap: 6px; }
+        .button-left {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            justify-content: flex-start;
+        }
+        .button-center {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+        .button-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: flex-end;
+        }
         .btn {
-            padding: 12px 16px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 25px;
+            border-radius: 40px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 1em;
             transition: all 0.2s;
             color: #fff;
             letter-spacing: 1px;
@@ -305,16 +326,15 @@
         .btn:disabled { background: #333 !important; cursor: not-allowed; box-shadow: none; }
         .btn-spin {
             background: linear-gradient(145deg, #e67e22, #d35400);
-            font-size: 1.15em;
+            font-size: 1.3em;
             text-shadow: 1px 1px 0 #b85e00;
-            padding: 14px 20px;
-            box-shadow: 0 0 20px rgba(230,126,34,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+            padding: 20px 40px;
+            box-shadow: 0 0 25px rgba(230,126,34,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
         }
         .btn-auto { background: linear-gradient(145deg, #1a5276, #154360); }
         .btn-stop { background: linear-gradient(145deg, #c0392b, #922b21); }
 
-        .bet-label { font-size: 0.85em; font-weight: bold; color: #ddd; }
-        /* Custom bet dropdown */
+        .bet-label { font-size: 1em; font-weight: bold; color: #ddd; }
         .custom-bet-dropdown {
             position: relative;
             display: inline-block;
@@ -326,11 +346,11 @@
             background: #1a1a1a;
             border: 1px solid rgba(201,168,76,0.5);
             border-radius: 25px;
-            padding: 8px 15px;
+            padding: 12px 20px;
             color: #f1c40f;
             font-weight: bold;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 1em;
             box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
             transition: all 0.2s;
         }
@@ -339,26 +359,26 @@
             box-shadow: 0 0 10px rgba(230,126,34,0.7);
         }
         .bet-display .material-icons {
-            font-size: 18px;
+            font-size: 22px;
         }
         .bet-options {
             position: absolute;
-            bottom: 45px;
+            bottom: 55px;
             right: 0;
             background: #1a1a1a;
             border: 1px solid #444;
             border-radius: 8px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.8);
-            min-width: 80px;
+            min-width: 100px;
             overflow: hidden;
             display: none;
             z-index: 1002;
         }
         .bet-option {
-            padding: 8px 15px;
+            padding: 10px 20px;
             color: #fff;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 1em;
             cursor: pointer;
             border-bottom: 1px solid #333;
             transition: background 0.2s;
@@ -367,30 +387,78 @@
         .bet-option:hover { background: #e67e22; }
         .bet-option.selected { background: #e67e22; color: #fff; }
 
-        .message { min-height: 30px; font-size: 0.9em; margin: 4px 0; font-weight: bold; color: #fff; text-align: center; flex-shrink: 0; }
-        .free-spins-msg { color: #2ecc71; font-size: 0.85em; min-height: 20px; text-align: center; flex-shrink: 0; }
+        .message { min-height: 40px; font-size: 1.1em; margin: 10px 0; font-weight: bold; color: #fff; text-align: center; flex-shrink: 0; }
+        .free-spins-msg { color: #2ecc71; font-size: 1em; min-height: 25px; text-align: center; flex-shrink: 0; }
 
         #confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
         .confetti { position: absolute; width: 8px; height: 8px; animation: confetti-fall linear forwards; }
         @keyframes confetti-fall { 0% { transform: translateY(-100%) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
+        /* ===================== DESKTOP SPECIFIC ===================== */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 30px;
+                max-width: 900px;
+            }
+            .main-card {
+                padding: 25px;
+                border-radius: 24px;
+            }
+            .premium-header,
+            .premium-footer {
+                border-radius: 20px;
+                padding: 25px;
+            }
+            .reels-container {
+                gap: 12px;
+                padding: 15px;
+                margin-bottom: 25px;
+            }
+            .reel-cell {
+                padding: 8px;
+            }
+            .btn {
+                padding: 18px 35px;
+                font-size: 1.1em;
+            }
+            .btn-spin {
+                padding: 22px 45px;
+                font-size: 1.4em;
+            }
+            .bet-display {
+                padding: 14px 25px;
+                font-size: 1.1em;
+            }
+        }
+
+        /* ===================== MOBILE SPECIFIC ===================== */
         @media (max-width: 600px) {
             .container { padding: 4px; }
             .main-card { padding: 4px; border-radius: 12px; }
-            .premium-header { padding: 6px; }
-            .slot-title { font-size: 18px; }
+            .premium-header { padding: 6px; margin-bottom: 4px; }
+            .slot-title { font-size: 18px; margin-bottom: 4px; }
             .mult-badge { padding: 6px 10px; font-size: 0.7em; }
-            .reels-container { gap: 4px; padding: 4px; }
+            .reels-container { gap: 4px; padding: 4px; margin-bottom: 4px; }
             .premium-footer { padding: 6px; }
+            .button-row { gap: 4px; }
+            .button-left { gap: 4px; }
+            .button-right { gap: 4px; }
             .btn { padding: 10px 12px; font-size: 0.8em; }
             .btn-spin { font-size: 1em; padding: 12px 16px; }
+            .bet-label { font-size: 0.7em; }
             .bet-display { padding: 6px 12px; font-size: 0.8em; }
-            .bet-options { bottom: 40px; }
+            .bet-options { bottom: 40px; min-width: 70px; }
+            .bet-option { padding: 6px 12px; font-size: 0.8em; }
+            .message { font-size: 0.85em; min-height: 25px; }
+            .free-spins-msg { font-size: 0.8em; }
         }
+
         @media (max-width: 400px) {
             .btn { padding: 8px 10px; font-size: 0.75em; }
             .btn-spin { font-size: 0.9em; padding: 10px 14px; }
             .slot-title { font-size: 16px; }
+            .mult-badge { padding: 4px 8px; font-size: 0.65em; }
+            .bet-display { padding: 5px 10px; font-size: 0.75em; }
         }
     </style>
 </head>
@@ -427,8 +495,10 @@
             <div class="premium-header">
                 <div class="slot-title">🐾 ANIMAL SLOTS</div>
                 <div class="multiplier-row">
+                    <span class="mult-badge" data-mult="0">0x</span>
                     <span class="mult-badge" data-mult="1">1x</span>
                     <span class="mult-badge" data-mult="2">2x</span>
+                    <span class="mult-badge" data-mult="3">3x</span>
                     <span class="mult-badge" data-mult="4">4x</span>
                     <span class="mult-badge" data-mult="6">6x</span>
                     <span class="mult-badge" data-mult="10">10x</span>
@@ -503,7 +573,7 @@
 
         let currentBalance = 0;
         let pendingBetDeduction = 0;
-        let currentBetValue = 1;  // default bet
+        let currentBetValue = 1;
 
         function setBalance(value) {
             const parsed = Number(value);
@@ -565,13 +635,13 @@
         let autoFreeSpinTimer = null;
         let freeSpinSessionTotalWin = 0;
 
-        // ===================== AUDIO (PER REEL) =====================
+        // ===================== AUDIO =====================
         const REEL_AUDIO = [
-            { roll: '/rolling-reels.wav', stop: '/reel-stop-1.wav' },
-            { roll: '/rolling-reels.wav', stop: '/reel-stop-2.wav' },
-            { roll: '/rolling-reels.wav', stop: '/reel-stop-3.wav' },
-            { roll: '/rolling-reels.wav', stop: '/reel-stop-4.wav' },
-            { roll: '/rolling-reels.wav', stop: '/reel-stop-5.wav' },
+            { roll: '/rolling-reels.wav', stop: null },
+            { roll: '/rolling-reels.wav', stop: null },
+            { roll: '/rolling-reels.wav', stop: null },
+            { roll: '/rolling-reels.wav', stop: null },
+            { roll: '/rolling-reels.wav', stop: null },
         ];
 
         let audioContext = null;
@@ -605,7 +675,7 @@
             REEL_AUDIO.forEach((cfg, index) => {
                 let audio = new Audio(cfg.roll || '/rolling-reels.wav');
                 audio.loop = true;
-                audio.volume = 0.1;   // Reduced rolling volume
+                audio.volume = 0.1;
                 audio.play().catch(err => console.warn(`Reel ${index+1} rolling sound failed:`, err));
                 rollingAudios.push(audio);
             });
@@ -621,84 +691,132 @@
 
         function playReelStop(reelIndex) {
             reelStoppedCount++;
-            const stopFile = REEL_AUDIO[reelIndex]?.stop;
-            if (stopFile) {
-                const audio = new Audio(stopFile);
-                audio.volume = 1.0;
-                audio.play().catch(err => {
-                    console.warn(`Reel ${reelIndex+1} stop sound failed, using tone.`);
-                    const baseFreq = 600 + (reelIndex + 1) * 80;
-                    playTone(baseFreq, 0.12, 'square', 0.9);
-                    playTone(baseFreq * 0.7, 0.15, 'square', 0.8, 0.03);
-                });
-            } else {
-                const baseFreq = 600 + (reelIndex + 1) * 80;
-                playTone(baseFreq, 0.12, 'square', 0.9);
-                playTone(baseFreq * 0.7, 0.15, 'square', 0.8, 0.03);
-            }
+            playTone(600 + (reelIndex + 1) * 80, 0.12, 'square', 0.9);
+            playTone(400, 0.1, 'square', 0.8, 0.03);
         }
 
-        // ===================== WIN SOUND EFFECTS =====================
-        function playHighlightTone() {
-            playTone(880, 0.15, 'sine', 0.8);
-            playTone(1100, 0.1, 'sine', 0.7, 0.05);
+        function playWinSound() {
+            const audio = new Audio('/winning.wav');
+            audio.volume = 0.8;
+            audio.play().catch(() => playTone(880, 0.15, 'sine', 0.8));
         }
 
-        function playClearTone() {
-            playTone(660, 0.12, 'sine', 0.7);
-        }
-
-        function playFlipTone() {
-            playTone(500, 0.08, 'square', 0.7);
-            playTone(700, 0.08, 'square', 0.7, 0.06);
-        }
-
-        function playScatterTone() {
-            playTone(523, 0.1, 'triangle', 0.8);
-            playTone(659, 0.1, 'triangle', 0.8, 0.08);
-            playTone(784, 0.15, 'triangle', 0.8, 0.16);
-        }
-
-        function playTotalWinTone() {
-            const notes = [523, 659, 784, 1046, 1318];
-            notes.forEach((freq, i) => {
-                playTone(freq, 0.2, 'sine', 0.8, i * 0.12);
-            });
+        function playScatterWinSound() {
+            const audio = new Audio('/you-won-scatter.wav');
+            audio.volume = 0.8;
+            audio.play().catch(() => playTone(523, 0.1, 'triangle', 0.8));
         }
 
         function playFreeSpinsSound() {
-            playTone(400, 0.1, 'triangle', 0.7);
-            setTimeout(() => playTone(500, 0.1, 'triangle', 0.7), 150);
-            setTimeout(() => playTone(600, 0.2, 'triangle', 0.7), 300);
+            const audio = new Audio('/free-spin.wav');
+            audio.volume = 0.8;
+            audio.play().catch(() => {
+                playTone(400, 0.1, 'triangle', 0.7);
+                setTimeout(() => playTone(500, 0.1, 'triangle', 0.7), 150);
+                setTimeout(() => playTone(600, 0.2, 'triangle', 0.7), 300);
+            });
         }
 
-        // ===================== BUTTON CLICK SOUND =====================
+        function playTotalWinSound() {
+            const audio = new Audio('/total-win.wav');
+            audio.volume = 0.8;
+            audio.play().catch(() => {
+                [523, 659, 784, 1046].forEach((f,i)=>playTone(f,0.2,'sine',0.8,i*0.12));
+            });
+        }
+
+        function playDoubleSound() {
+            const audio = new Audio('/double.wav');
+            audio.volume = 0.8;
+            audio.play().catch(() => playTone(500, 0.08, 'square', 0.7));
+        }
+
+        function playMultiplierSound(mult) {
+            let file;
+            switch(mult) {
+                case 0: file = null; break;
+                case 1: file = '/1-time.wav'; break;
+                case 2: file = '/2-times.wav'; break;
+                case 3: file = '/3-times.wav'; break;
+                case 4: file = '/4-times.wav'; break;
+                case 6: file = '/6-times.wav'; break;
+                case 10: file = '/10-times.wav'; break;
+                default: return;
+            }
+            if (file) {
+                const audio = new Audio(file);
+                audio.volume = 0.6;
+                audio.play().catch(() => playTone(880, 0.1, 'sine', 0.5));
+            }
+        }
+
         function playButtonClickSound() {
             playTone(200, 0.08, 'square', 0.4);
             playTone(300, 0.08, 'square', 0.3, 0.04);
         }
 
-        // ===================== BACKGROUND MUSIC =====================
         function startBackgroundMusic() {
             bgMusic.volume = 0.4;
             bgMusic.play().catch(err => console.warn('Background music failed:', err));
         }
 
+        // ===================== ANIMATED TOTAL WIN COUNTER =====================
+        function animateTotalWin(finalTotal) {
+            return new Promise((resolve) => {
+                if (finalTotal <= 0) {
+                    messageDiv.innerHTML = `<div style="font-weight:900; color:#f1c40f;">🎉 FREE SPINS TOTAL WIN: 0 🪙</div>`;
+                    resolve();
+                    return;
+                }
+
+                const counterAudio = new Audio('/counter.wav');
+                counterAudio.volume = 0.8;
+                counterAudio.loop = true;
+                counterAudio.play().catch(err => console.warn('Counter sound failed:', err));
+
+                const duration = 2000;
+                const startTime = performance.now();
+
+                messageDiv.innerHTML = `<div style="font-weight:900; color:#f1c40f;">🎉 FREE SPINS TOTAL WIN: <span id="freeSpinTotalCounter">0</span> 🪙</div>`;
+
+                function update(now) {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const currentValue = Math.floor(progress * finalTotal);
+
+                    const el = document.getElementById('freeSpinTotalCounter');
+                    if (el) el.textContent = currentValue;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    } else {
+                        if (el) el.textContent = finalTotal;
+                        counterAudio.pause();
+                        counterAudio.currentTime = 0;
+                        playTotalWinSound();
+                        resolve();
+                    }
+                }
+
+                requestAnimationFrame(update);
+            });
+        }
+
         // ===================== REELS =====================
-        function getCellHeight() { const cell = document.querySelector('.reel-cell'); return cell ? cell.offsetHeight : 80; }
+        function getCellHeight() { const cell = document.querySelector('.reel-cell'); return cell ? cell.offsetHeight : 110; }
 
         function createReels() {
             reelsContainer.innerHTML = '';
             reelStrips.length = 0;
             reelColumns.length = 0;
-            const containerWidth = reelsContainer.clientWidth - 16;
-            const availableWidth = Math.min(containerWidth, 600);
-            const gap = 5;
+            const containerWidth = reelsContainer.clientWidth - 20;
+            const availableWidth = Math.min(containerWidth, 900);
+            const gap = 10;
             const totalGap = gap * (REEL_COUNT - 1);
             const maxCellWidth = Math.floor((availableWidth - totalGap) / REEL_COUNT);
-            const maxCellHeight = Math.floor(400 / VISIBLE_ROWS);
-            const cellSize = Math.min(maxCellWidth, maxCellHeight, 80);
-            reelsContainer.style.height = (cellSize * VISIBLE_ROWS) + 'px';
+            const maxCellHeight = window.innerWidth < 600 ? 80 : 110;   // smaller on mobile
+            const cellSize = Math.min(maxCellWidth, maxCellHeight);
+            reelsContainer.style.height = (cellSize * VISIBLE_ROWS + 20) + 'px';
             reelsContainer.style.overflowX = 'auto';
 
             for (let col = 0; col < REEL_COUNT; col++) {
@@ -777,9 +895,9 @@
         function updateMultiplierBadges(mult) {
             multBadges.forEach(badge => {
                 const val = parseInt(badge.dataset.mult);
-                if (val === mult) badge.classList.add('active');
-                else badge.classList.remove('active');
+                badge.classList.toggle('active', val === mult);
             });
+            if (mult > 0) playMultiplierSound(mult);
         }
 
         function spawnConfetti(count=30) {
@@ -803,7 +921,7 @@
                 for (const win of wins) {
                     if (win.type === 'scatter') {
                         messageDiv.textContent = `Scatter ${win.count}x! +${win.winAmount} coins`;
-                        playScatterTone();
+                        playScatterWinSound();
                         await new Promise(r => setTimeout(r, 1200));
                         continue;
                     }
@@ -814,7 +932,7 @@
                             if (!cell) continue;
                             const img = cell.querySelector('img');
                             if (!img) continue;
-                            playFlipTone();
+                            playDoubleSound();
                             img.style.transition = 'transform 0.5s';
                             img.style.transform = 'rotateY(90deg)';
                             await new Promise(r => setTimeout(r, 250));
@@ -825,11 +943,10 @@
                     }
 
                     highlightPositions(win.positions || []);
-                    playHighlightTone();
+                    playWinSound();
                     messageDiv.textContent = `${win.symbol.id.toUpperCase()} x${win.count} = ${win.winAmount} coins`;
                     await new Promise(r => setTimeout(r, 800));
                     clearHighlights();
-                    playClearTone();
                     await new Promise(r => setTimeout(r, 300));
                 }
 
@@ -840,7 +957,7 @@
 
                 if (totalWin > 0) {
                     spawnConfetti(50);
-                    playTotalWinTone();
+                    playTotalWinSound();
 
                     if (isFreeSpin) {
                         freeSpinSessionTotalWin += totalWin;
@@ -859,8 +976,16 @@
                     messageDiv.textContent = 'No win. Try again!';
                 }
 
-                const returnedBalance = getBalanceFromData(spinData);
-                if (returnedBalance !== undefined) setBalance(returnedBalance);
+                const shouldUpdateBalance = !isFreeSpin || spinData.totalFreeSpinWin !== undefined;
+                if (shouldUpdateBalance && spinData.newBalance !== undefined) {
+                    pendingBetDeduction = 0;
+                    setBalance(spinData.newBalance);
+                }
+
+                if (spinData.totalFreeSpinWin !== undefined) {
+                    const totalFreeSpinWin = Number(spinData.totalFreeSpinWin);
+                    await animateTotalWin(totalFreeSpinWin);
+                }
 
                 if (spinData && spinData.freeSpinsAwarded > 0) {
                     freeSpinsMsgDiv.textContent = `🎁 +${spinData.freeSpinsAwarded} Free Spins!`;
@@ -904,7 +1029,7 @@
             }
             clearHighlights();
 
-            const bet = currentBetValue || 1;   // use custom bet value
+            const bet = currentBetValue || 1;
 
             if (!isFreeSpin) {
                 if (bet > currentBalance) {
@@ -1032,11 +1157,6 @@
                 if (!res.ok) throw new Error(data.error || 'Spin failed');
                 spinData = data;
                 grid = data.grid;
-                const returnedBalance = getBalanceFromData(spinData);
-                if (returnedBalance !== undefined) {
-                    pendingBetDeduction = 0;
-                    setBalance(returnedBalance);
-                }
 
                 for (let col = 0; col < REEL_COUNT; col++) {
                     const colSymbols = grid[col].map(sym => SYMBOLS.find(s => s.id === sym.id) || SYMBOLS[0]);
@@ -1075,7 +1195,7 @@
                 return;
             }
             autoSpinsRemaining--;
-            spin(false, () => { autoSpinTimer = setTimeout(autoSpinLoop, 500); });
+            spin(false, () => { autoSpinTimer = setTimeout(autoSpinLoop, 2000); });
         }
 
         // ===================== AUTO FREE SPINS =====================
@@ -1096,7 +1216,7 @@
             spin(true, (spinData) => {
                 if (!autoFreeSpinsActive) return;
                 if (spinData && spinData.freeSpinsRemaining > 0) {
-                    autoFreeSpinTimer = setTimeout(autoFreeSpinLoop, 500);
+                    autoFreeSpinTimer = setTimeout(autoFreeSpinLoop, 2000);
                 } else {
                     autoFreeSpinsActive = false;
                     updateButtons();
@@ -1136,7 +1256,7 @@
                 if (data.freeSpins) {
                     freeSpinsMsgDiv.textContent = `🎁 Free spins remaining: ${data.freeSpins}`;
                 }
-                updateMultiplierBadges(data.multiplier || 1);
+                updateMultiplierBadges(data.multiplier || 0);
             } catch (err) {
                 console.error('fetchState error:', err);
             }
@@ -1151,14 +1271,13 @@
             gameContainer.style.display = 'flex';
             fetchState();
             createReels();
-            updateMultiplierBadges(1);
+            updateMultiplierBadges(0);
             updateButtons();
         }
 
         // ===================== INIT =====================
         startBtn.addEventListener('click', startGame);
 
-        // Attach click sound to all buttons
         document.addEventListener('click', (e) => {
             if (e.target.closest('button, .btn, .header-icon-btn, #startBtn')) {
                 playButtonClickSound();
@@ -1192,7 +1311,6 @@
         stopBtn.addEventListener('click', stopAllAuto);
         window.addEventListener('resize', () => { if (!isSpinning) createReels(); });
 
-        // Hamburger menu toggle
         menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
