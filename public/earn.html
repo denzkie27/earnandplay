@@ -1071,11 +1071,7 @@
     </div>
     <div class="coins-box">
       <div class="coins">
-        <svg class="coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
-          <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
-          <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
-        </svg>
+        <img src="/coin.png" class="coin-icon" alt="Coin" />
         <span id="coinsHeader">0</span>
       </div>
       <button class="earn-btn" id="earnBtn"><span class="nx-icon nx-icon--sm"></span> Earn</button>
@@ -1096,17 +1092,13 @@
   <div class="container">
     <div class="main-card">
       <div class="coin-logo-wrap">
-        <img src="https://cdn.wapka.org/00h8nc/f6c4ed99255dfa6f1124d5eb08c4c514/peso.png" class="coin-logo" alt="Coin" />
+        <img src="/coin.png" class="coin-logo" alt="Coin" />
       </div>
       <div class="page-title">Earn Coins</div>
       <div class="subtitle">Watch ads & unlock premium content</div>
 
       <div class="coins-big">
-        <svg class="coin-icon-big" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
-          <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
-          <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
-        </svg>
+        <img src="/coin.png" class="coin-icon-big" alt="Coin" />
         <span id="coins">0</span>
       </div>
 
@@ -1255,11 +1247,7 @@
       const popup = document.createElement("div");
       popup.className = "coin-popup";
       popup.innerHTML = `
-        <svg class="popup-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FFA000" stroke-width="1.5"/>
-          <circle cx="12" cy="12" r="6" fill="none" stroke="#FFA000" stroke-width="1" opacity="0.4"/>
-          <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#E65100" font-family="Arial, sans-serif">$</text>
-        </svg>
+        <img src="/coin.png" class="popup-icon" alt="Coin" />
         +${amount}
       `;
       document.body.appendChild(popup);
