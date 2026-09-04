@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign In – YOUR TV</title>
+  <title>Sign In – Animal Slots</title>
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
 
@@ -37,6 +37,8 @@
     .auth-header{
       padding:20px 22px; font-size:22px; font-weight:800;
       border-bottom:1px solid rgba(255,255,255,0.06); text-align:center;
+      background:linear-gradient(90deg,#ffd700,#ff8f00);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
     }
 
     .auth-body{ padding:22px; display:flex; flex-direction:column; gap:14px; }
@@ -47,7 +49,7 @@
       color:#fff; font-size:15px; padding:0 18px; transition:.25s;
     }
     .auth-body input:focus{
-      border-color:#ff003c; box-shadow:0 0 0 3px rgba(255,0,60,0.15);
+      border-color:#ffd700; box-shadow:0 0 0 3px rgba(255,215,0,0.15);
     }
     .auth-body input::placeholder{ color:#888; }
 
@@ -61,7 +63,7 @@
     .auth-submit:disabled{ opacity:.6; cursor:not-allowed; }
 
     .auth-switch{ text-align:center; font-size:13px; color:#aaa; }
-    .auth-switch a{ color:#ff5a6a; cursor:pointer; font-weight:600; }
+    .auth-switch a{ color:#ffd700; cursor:pointer; font-weight:600; }
     .auth-switch a:hover{ text-decoration:underline; }
 
     .auth-error{ color:#ff5a5a; font-size:13px; text-align:center; min-height:20px; }
@@ -114,10 +116,6 @@
       transform: scale(1.05);
       border-color: rgba(255, 255, 255, .15);
     }
-    .header-icon-btn .nx-icon {
-      font-size: 22px;
-      opacity: .85;
-    }
 
     .play-slots-btn {
       background: #e67e22;
@@ -157,7 +155,7 @@
     <input type="email" id="loginEmail" placeholder="Email address" />
     <input type="password" id="loginPassword" placeholder="Password" />
     <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#aaa;cursor:pointer;user-select:none;">
-      <input type="checkbox" onchange="document.getElementById('loginPassword').type=this.checked?'text':'password'" style="width:16px;height:16px;accent-color:#ff003c;">
+      <input type="checkbox" onchange="document.getElementById('loginPassword').type=this.checked?'text':'password'" style="width:16px;height:16px;accent-color:#ffd700;">
       Show password
     </label>
     <div class="auth-error" id="loginError"></div>
@@ -170,32 +168,30 @@
 </div>
 
 <script type="module">
-  // ========== FIREBASE CONFIG ==========
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
+  // Firebase config matches all other pages
   const firebaseConfig = {
     apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
     authDomain: "yourtv-c12eb.firebaseapp.com",
     projectId: "yourtv-c12eb",
-    storageBucket: "yourtv-c12eb.firebasestorage.app",
+    storageBucket: "yourtv-c1eb.firebasestorage.app",
     messagingSenderId: "28690991912",
-    appId: "1:28690991912:web:aced74eff2ddd5eaaede1d",
-    measurementId: "G-S28R0XLW60"
+    appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
+    measurementId: "G-CC7DLZS0NB"
   };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // ========== UI Elements ==========
   const emailEl   = document.getElementById('loginEmail');
   const passEl    = document.getElementById('loginPassword');
   const errorEl   = document.getElementById('loginError');
   const loginBtn  = document.getElementById('loginBtn');
 
-  // ========== LOGIN FUNCTION ==========
   async function handleLogin() {
     const email = emailEl.value.trim();
     const pass  = passEl.value;
@@ -210,20 +206,28 @@
 
     try {
       const cred = await signInWithEmailAndPassword(auth, email, pass);
-      // Get user data from Firestore for coins / displayName
       const userDoc = await getDoc(doc(db, 'users', cred.user.uid));
       const userData = userDoc.exists() ? userDoc.data() : null;
-      const username = cred.user.displayName || email.split('@')[0];
-      const coins    = userData?.coins || 0;
+      const coins = userData?.coins || 0;
+
+      // Sync server session with Firestore balance
+      try {
+        await fetch('/api/sync-balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ balance: coins })
+        });
+      } catch (syncErr) {
+        console.warn('Could not sync server balance:', syncErr);
+      }
 
       localStorage.setItem('yourtv_session', JSON.stringify({
-        username,
+        username: cred.user.displayName || email.split('@')[0],
         email: cred.user.email,
         uid: cred.user.uid,
         coins
       }));
 
-      // Redirect back to the page they came from (or default to index.html)
       const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
       window.location.href = redirect;
     } catch (e) {
@@ -235,11 +239,9 @@
     }
   }
 
-  // ========== Event Listeners ==========
   loginBtn.addEventListener('click', handleLogin);
   document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
 
-  // If already logged in, redirect
   onAuthStateChanged(auth, user => {
     if (user) {
       const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
