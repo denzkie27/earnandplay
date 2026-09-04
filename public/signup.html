@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Account – YOUR TV</title>
+  <title>Create Account – Animal Slots</title>
   <style>
     *{ margin:0; padding:0; box-sizing:border-box; }
     body{
@@ -164,7 +164,7 @@
 </header>
 
 <div class="auth-box">
-  <div class="auth-header">🎬 Create Account</div>
+  <div class="auth-header">🎰 Create Account</div>
   <div class="auth-body">
     <input type="text" id="regUsername" placeholder="Username (3+ chars)" autocomplete="username" />
     <input type="email" id="regEmail" placeholder="Email address" autocomplete="email" />
@@ -197,14 +197,15 @@
     updateProfile
   } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
+  // Firebase config matches all other pages (index, earn, welcome)
   const firebaseConfig = {
     apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
     authDomain: "yourtv-c12eb.firebaseapp.com",
     projectId: "yourtv-c12eb",
-    storageBucket: "yourtv-c12eb.firebasestorage.app",
+    storageBucket: "yourtv-c1eb.firebasestorage.app",
     messagingSenderId: "28690991912",
-    appId: "1:28690991912:web:aced74eff2ddd5eaaede1d",
-    measurementId: "G-S28R0XLW60"
+    appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
+    measurementId: "G-CC7DLZS0NB"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -230,7 +231,7 @@
     toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 4000);
   }
 
-  // Password strength (unchanged)
+  // Password strength
   passEl.addEventListener('input', function() {
     const password = this.value;
     strengthBar.className = 'bar';
@@ -277,16 +278,16 @@
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: username });
 
-      // ✅ Store username + email in sessionStorage so other pages can use them
+      // Store signup info for reward page
       sessionStorage.setItem('new_signup', JSON.stringify({ username, email }));
 
       successEl.innerText = '✅ Account created! Setting up your wallet...';
       showToast('Welcome! You will receive 100 coins.', 'success');
 
-      // Redirect to earn page (or index) after short delay
+      // Redirect to reward.html (welcome page that awards 100 coins)
       setTimeout(() => {
-        window.location.href = 'earn.html';
-      }, 1500);
+        window.location.href = 'reward.html';
+      }, 1000);
 
     } catch (error) {
       console.error(error);
@@ -323,11 +324,6 @@
   }
   pass2El.addEventListener('input', validatePasswordMatch);
   passEl.addEventListener('input', validatePasswordMatch);
-
-  // If already logged in, go to home
-  if (auth.currentUser) {
-    window.location.href = 'index.html';
-  }
 </script>
 </body>
 </html>
