@@ -325,7 +325,7 @@ app.post('/api/spin', (req, res) => {
         freeSpinsRemaining: result.freeSpinsRemaining,
         multiplierUsed: result.multiplierUsed,
         currentMultiplier: result.currentMultiplier,
-        totalFreeSpinWin
+        totalFreeSpinWin: totalFreeSpinWin
     });
 });
 
