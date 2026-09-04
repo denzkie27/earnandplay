@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome – Animal Slots</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,215,0,0.08), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255,0,60,0.08), transparent 40%),
+        linear-gradient(145deg, #0a0a0f, #1a1a2e);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+    /* floating coins background */
+    body::before {
+      content: "🪙 🎰 🪙 🎰 🪙";
+      position: absolute;
+      top: -50px;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 40px;
+      opacity: 0.05;
+      transform: rotate(-10deg);
+      pointer-events: none;
+    }
+    .card {
+      background: linear-gradient(145deg, rgba(30,30,50,0.9), rgba(10,10,20,0.95));
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 2px solid rgba(255,215,0,0.4);
+      border-radius: 30px;
+      padding: 40px 30px;
+      width: 92%;
+      max-width: 440px;
+      box-shadow:
+        0 0 60px rgba(255,215,0,0.15),
+        0 25px 60px rgba(0,0,0,0.8),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+      animation: pop .5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 1;
+    }
+    @keyframes pop {
+      from { opacity:0; transform:scale(.8) translateY(20px); }
+      to { opacity:1; transform:scale(1) translateY(0); }
+    }
+    .icon {
+      font-size: 70px;
+      margin-bottom: 15px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    h1 {
+      font-size: 34px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ffd700, #ffb300, #ff8f00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .sub {
+      font-size: 15px;
+      color: #ccc;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .sub strong {
+      color: #ffd700;
+    }
+    .coins-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(145deg, rgba(255,215,0,0.2), rgba(255,140,0,0.1));
+      border: 1px solid rgba(255,215,0,0.5);
+      border-radius: 30px;
+      padding: 12px 28px;
+      font-weight: 800;
+      font-size: 24px;
+      color: #ffd700;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 20px rgba(255,215,0,0.2);
+    }
+    .coins-badge span:last-child {
+      font-size: 30px;
+      text-shadow: 0 0 20px rgba(255,215,0,0.8);
+    }
+    .error-msg {
+      color: #ff5a5a;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 16px 35px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #ff003c, #ff7a00);
+      color: #fff;
+      font-weight: 800;
+      font-size: 17px;
+      text-decoration: none;
+      transition: all .25s;
+      box-shadow: 0 8px 25px rgba(255,0,60,0.4);
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(255,0,60,0.6);
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+    .gamezone-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #aaa;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="gamezone-tag">🎰 PREMIUM GAMEZONE</div>
+  <div class="icon">🪙</div>
+  <h1>Welcome to Animal Slots!</h1>
+  <p class="sub">
+    Your adventure begins!<br>
+    You've received <strong>100 coins</strong> to start spinning.
+  </p>
+  <div class="coins-badge">
+    <span>💰</span>
+    <span id="coinAmount">…</span>
+  </div>
+  <div id="errorMsg" class="error-msg"></div>
+  <a href="index.html" class="btn" id="continueBtn" style="display:none;">Start Playing</a>
+</div>
+
+<script>
+  (async () => {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
+    const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+    const { getFirestore, doc, getDoc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+
+    // Same Firebase config as other pages
+    const firebaseConfig = {
+      apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
+      authDomain: "yourtv-c12eb.firebaseapp.com",
+      projectId: "yourtv-c12eb",
+      storageBucket: "yourtv-c1eb.firebasestorage.app",
+      messagingSenderId: "28690991912",
+      appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
+      measurementId: "G-CC7DLZS0NB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const coinEl = document.getElementById('coinAmount');
+      const errorEl = document.getElementById('errorMsg');
+      const contBtn = document.getElementById('continueBtn');
+
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const snap = await getDoc(userRef);
+        let coins = 0;
+
+        if (!snap.exists()) {
+          const stored = sessionStorage.getItem('new_signup');
+          const info = stored ? JSON.parse(stored) : {};
+          const username = info.username || user.displayName || 'Player';
+          const email    = info.email    || user.email;
+
+          coins = 100;
+
+          await setDoc(userRef, {
+            uid: user.uid,
+            username: username,
+            email: email,
+            coins: coins,
+            watchlist: [],
+            history: [],
+            subscriptionStatus: 'none',
+            subscriptionPlan: null,
+            subscriptionExpires: null,
+            premium: false,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+
+          sessionStorage.removeItem('new_signup');
+        } else {
+          coins = snap.data().coins || 0;
+        }
+
+        // Sync slot server balance
+        try {
+          await fetch('/api/sync-balance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ balance: coins })
+          });
+        } catch (syncErr) {
+          console.warn('Could not sync server balance:', syncErr);
+        }
+
+        coinEl.textContent = coins;
+        contBtn.style.display = 'inline-block';
+      } catch (error) {
+        console.error('Welcome page error:', error);
+        errorEl.textContent = 'Could not load your coins. Please contact support.';
+        coinEl.textContent = '?';
+        contBtn.style.display = 'inline-block';
+      }
+    });
+  })();
+</script>
+</body>
+</html>
