@@ -51,6 +51,35 @@
             box-shadow: none !important;
         }
 
+        /* ===================== LOADING OVERLAY ===================== */
+        #loadingOverlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #e67e22;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #loadingOverlay p {
+            color: #ccc;
+            font-size: 16px;
+        }
+
         /* ===================== START SCREEN ===================== */
         #startScreen {
             position: fixed;
@@ -146,6 +175,7 @@
             font-size: 0.9em;
             border-bottom: 1px solid #333;
             transition: background 0.2s;
+            cursor: pointer;
         }
         .dropdown-item:last-child { border-bottom: none; }
         .dropdown-item:hover { background: #e50914; }
@@ -480,8 +510,14 @@
     </style>
 </head>
 <body>
+    <!-- ===================== LOADING OVERLAY ===================== -->
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+        <p>Loading game…</p>
+    </div>
+
     <!-- ===================== START SCREEN ===================== -->
-    <div id="startScreen">
+    <div id="startScreen" style="display:none;">
         <h1>🐾 ANIMAL SLOTS</h1>
         <p>Welcome! Press the button to start playing.</p>
         <button id="startBtn">START GAME</button>
@@ -498,6 +534,7 @@
             </button>
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="earn.html" class="dropdown-item">Earn Coins</a>
+                <a href="#" class="dropdown-item" id="logoutItem">Logout</a>
             </div>
         </div>
         <div class="header-balance">
@@ -567,795 +604,840 @@
     <div id="confetti-container"></div>
 
     <script>
-        // ===================== DOM =====================
-        const balanceValueSpan = document.getElementById('balanceValue');
-        const betDisplayBtn = document.getElementById('betDisplayBtn');
-        const betDisplayValue = document.getElementById('betDisplayValue');
-        const betOptions = document.getElementById('betOptions');
-        const spinBtn = document.getElementById('spinBtn');
-        const autoSpinBtn = document.getElementById('autoSpinBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const messageDiv = document.getElementById('message');
-        const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
-        const reelsContainer = document.getElementById('reelsContainer');
-        const confettiContainer = document.getElementById('confetti-container');
-        const multBadges = document.querySelectorAll('.mult-badge');
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const bgMusic = document.getElementById('bgMusic');
-        const startScreen = document.getElementById('startScreen');
-        const startBtn = document.getElementById('startBtn');
-        const header = document.querySelector('.nf-header');
-        const gameContainer = document.getElementById('gameContainer');
-
-        let currentBalance = 0;
-        let pendingBetDeduction = 0;
-        let currentBetValue = 1;
-
-        function setBalance(value) {
-            const parsed = Number(value);
-            if (!Number.isFinite(parsed)) return false;
-            currentBalance = Math.max(0, parsed);
-            balanceValueSpan.textContent = String(currentBalance);
-            return true;
-        }
-
-        function getBalanceFromData(data) {
-            if (!data || typeof data !== 'object') return undefined;
-            if (data.newBalance !== undefined && data.newBalance !== null) return data.newBalance;
-            if (data.balance !== undefined && data.balance !== null) return data.balance;
-            return undefined;
-        }
-
-        const VISIBLE_ROWS = 5;
-        const REEL_COUNT = 5;
-        const STRIP_LENGTH = 60;
-        const STRIP_OFFSET = 10;
-
-        const SYMBOLS = [
-            { id: 'scatter', image: '/images/scatter.png', isScatter: true, isWild: false },
-            { id: 'wild',     image: '/images/wild.png',     isScatter: false, isWild: true },
-            { id: 'lion',     image: '/images/lion.png' },
-            { id: 'tiger',    image: '/images/tiger.png' },
-            { id: 'badger',   image: '/images/badger.png' },
-            { id: 'bear',     image: '/images/bear.png' },
-            { id: 'boar',     image: '/images/boar.png' },
-            { id: 'dragon',   image: '/images/dragon.png' },
-            { id: 'duck',     image: '/images/duck.png' },
-            { id: 'eagle',    image: '/images/eagle.png' },
-            { id: 'elephant', image: '/images/elephant.png' },
-            { id: 'frog',     image: '/images/frog.png' },
-            { id: 'goat',     image: '/images/goat.png' },
-            { id: 'gorilla',  image: '/images/gorilla.png' },
-            { id: 'hawk',     image: '/images/hawk.png' },
-            { id: 'hedgehog', image: '/images/hedgehog.png' },
-            { id: 'mouse',    image: '/images/mouse.png' },
-            { id: 'owl',      image: '/images/owl.png' },
-            { id: 'panther',  image: '/images/panther.png' },
-            { id: 'pig',      image: '/images/pig.png' },
-            { id: 'rabbit',   image: '/images/rabbit.png' },
-            { id: 'racoon',   image: '/images/racoon.png' },
-            { id: 'rhino',    image: '/images/rhino.png' },
-            { id: 'rooster',  image: '/images/rooster.png' },
-            { id: 'shark',    image: '/images/shark.png' },
-            { id: 'squirrel', image: '/images/squirrel.png' },
-            { id: 'wolf',     image: '/images/wolf.png' }
-        ];
-
-        const reelStrips = [];
-        const reelColumns = [];
-        let isSpinning = false;
-        let autoSpinning = false;
-        let autoSpinsRemaining = 0;
-        let autoSpinTimer = null;
-        let autoFreeSpinsActive = false;
-        let autoFreeSpinTimer = null;
-        let freeSpinSessionTotalWin = 0;
-
-        // ===================== AUDIO =====================
-        const REEL_AUDIO = [
-            { roll: '/rolling-reels.wav', stop: null },
-            { roll: '/rolling-reels.wav', stop: null },
-            { roll: '/rolling-reels.wav', stop: null },
-            { roll: '/rolling-reels.wav', stop: null },
-            { roll: '/rolling-reels.wav', stop: null },
-        ];
-
-        let audioContext = null;
-        let rollingAudios = [];
-        let reelStoppedCount = 0;
-
-        function initAudio() {
-            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioContext.state === 'suspended') audioContext.resume();
-        }
-
-        function playTone(freq, dur, type='sine', vol=0.3, when=0) {
-            initAudio();
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.type = type;
-            osc.frequency.value = freq;
-            gain.gain.value = vol;
-            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + dur + when);
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.start(audioContext.currentTime + when);
-            osc.stop(audioContext.currentTime + dur + when);
-        }
-
-        function startRollingSound() {
-            initAudio();
-            reelStoppedCount = 0;
-            stopRollingSound();
-
-            REEL_AUDIO.forEach((cfg, index) => {
-                let audio = new Audio(cfg.roll || '/rolling-reels.wav');
-                audio.loop = true;
-                audio.volume = 0.1;
-                audio.play().catch(err => console.warn(`Reel ${index+1} rolling sound failed:`, err));
-                rollingAudios.push(audio);
-            });
-        }
-
-        function stopRollingSound() {
-            rollingAudios.forEach(audio => {
-                audio.pause();
-                audio.currentTime = 0;
-            });
-            rollingAudios = [];
-        }
-
-        function playReelStop(reelIndex) {
-            reelStoppedCount++;
-            playTone(600 + (reelIndex + 1) * 80, 0.12, 'square', 0.9);
-            playTone(400, 0.1, 'square', 0.8, 0.03);
-        }
-
-        function playWinSound() {
-            const audio = new Audio('/winning.wav');
-            audio.volume = 0.8;
-            audio.play().catch(() => playTone(880, 0.15, 'sine', 0.8));
-        }
-
-        function playScatterWinSound() {
-            const audio = new Audio('/you-won-scatter.wav');
-            audio.volume = 0.8;
-            audio.play().catch(() => playTone(523, 0.1, 'triangle', 0.8));
-        }
-
-        function playFreeSpinsSound() {
-            const audio = new Audio('/free-spin.wav');
-            audio.volume = 0.8;
-            audio.play().catch(() => {
-                playTone(400, 0.1, 'triangle', 0.7);
-                setTimeout(() => playTone(500, 0.1, 'triangle', 0.7), 150);
-                setTimeout(() => playTone(600, 0.2, 'triangle', 0.7), 300);
-            });
-        }
-
-        function playTotalWinSound() {
-            const audio = new Audio('/total-win.wav');
-            audio.volume = 0.8;
-            audio.play().catch(() => {
-                [523, 659, 784, 1046].forEach((f,i)=>playTone(f,0.2,'sine',0.8,i*0.12));
-            });
-        }
-
-        function playDoubleSound() {
-            const audio = new Audio('/double.wav');
-            audio.volume = 0.8;
-            audio.play().catch(() => playTone(500, 0.08, 'square', 0.7));
-        }
-
-        function playCoinSound() {
-            const audio = new Audio('/coin.wav');
-            audio.volume = 0.5;
-            audio.play().catch(() => {
-                // Fallback tone if coin.wav is missing
-                playTone(800, 0.08, 'square', 0.3);
-                setTimeout(() => playTone(1000, 0.08, 'square', 0.3), 100);
-                setTimeout(() => playTone(1200, 0.1, 'square', 0.25), 200);
-            });
-        }
-
-        function playMultiplierSound(mult) {
-            let file;
-            switch(mult) {
-                case 0: file = null; break;
-                case 1: file = '/1-time.wav'; break;
-                case 2: file = '/2-times.wav'; break;
-                case 3: file = '/3-times.wav'; break;
-                case 4: file = '/4-times.wav'; break;
-                case 6: file = '/6-times.wav'; break;
-                case 10: file = '/10-times.wav'; break;
-                default: return;
-            }
-            if (file) {
-                const audio = new Audio(file);
-                audio.volume = 0.6;
-                audio.play().catch(() => playTone(880, 0.1, 'sine', 0.5));
-            }
-        }
-
-        function playButtonClickSound() {
-            playTone(200, 0.08, 'square', 0.4);
-            playTone(300, 0.08, 'square', 0.3, 0.04);
-        }
-
-        function startBackgroundMusic() {
-            bgMusic.volume = 0.4;
-            bgMusic.play().catch(err => console.warn('Background music failed:', err));
-        }
-
-        // ===================== ANIMATED TOTAL WIN COUNTER =====================
-        function animateTotalWin(finalTotal) {
-            return new Promise((resolve) => {
-                if (finalTotal <= 0) {
-                    messageDiv.innerHTML = `<div style="font-weight:900; color:#f1c40f;">🎉 FREE SPINS TOTAL WIN: 0 🪙</div>`;
-                    resolve();
-                    return;
-                }
-
-                const counterAudio = new Audio('/counter.wav');
-                counterAudio.volume = 0.8;
-                counterAudio.loop = true;
-                counterAudio.play().catch(err => console.warn('Counter sound failed:', err));
-
-                const duration = 2000;
-                const startTime = performance.now();
-
-                messageDiv.innerHTML = `<div style="font-weight:900; color:#f1c40f;">🎉 FREE SPINS TOTAL WIN: <span id="freeSpinTotalCounter">0</span> 🪙</div>`;
-
-                function update(now) {
-                    const elapsed = now - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const currentValue = Math.floor(progress * finalTotal);
-
-                    const el = document.getElementById('freeSpinTotalCounter');
-                    if (el) el.textContent = currentValue;
-
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    } else {
-                        if (el) el.textContent = finalTotal;
-                        counterAudio.pause();
-                        counterAudio.currentTime = 0;
-                        playTotalWinSound();
-                        resolve();
-                    }
-                }
-
-                requestAnimationFrame(update);
-            });
-        }
-
-        // ===================== REELS =====================
-        function getCellHeight() { const cell = document.querySelector('.reel-cell'); return cell ? cell.offsetHeight : 110; }
-
-        function createReels() {
-            reelsContainer.innerHTML = '';
-            reelStrips.length = 0;
-            reelColumns.length = 0;
-            const containerWidth = reelsContainer.clientWidth - 20;
-            const availableWidth = Math.min(containerWidth, 900);
-            const gap = 10;
-            const totalGap = gap * (REEL_COUNT - 1);
-            const maxCellWidth = Math.floor((availableWidth - totalGap) / REEL_COUNT);
-            const maxCellHeight = window.innerWidth < 600 ? 80 : 110;
-            const cellSize = Math.min(maxCellWidth, maxCellHeight);
-            reelsContainer.style.height = (cellSize * VISIBLE_ROWS + 20) + 'px';
-            reelsContainer.style.overflowX = 'auto';
-
-            for (let col = 0; col < REEL_COUNT; col++) {
-                const column = document.createElement('div');
-                column.className = 'reel-column';
-                column.style.width = cellSize + 'px';
-                column.style.height = (cellSize * VISIBLE_ROWS) + 'px';
-                column.style.flex = `0 0 ${cellSize}px`;
-
-                const strip = document.createElement('div');
-                strip.className = 'reel-strip';
-                strip.style.transform = 'translateY(0px)';
-                column.appendChild(strip);
-                reelsContainer.appendChild(column);
-                reelColumns.push(column);
-                reelStrips.push(strip);
-
-                for (let i = 0; i < STRIP_LENGTH; i++) {
-                    const symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                    const cell = createReelCell(symbol);
-                    cell.style.height = cellSize + 'px';
-                    cell.style.width = cellSize + 'px';
-                    strip.appendChild(cell);
-                }
-            }
-        }
-
-        function createReelCell(symbol) {
-            const cell = document.createElement('div');
-            cell.className = 'reel-cell';
-            const img = document.createElement('img');
-            img.src = symbol.image;
-            img.alt = symbol.id;
-            img.loading = 'eager';
-            img.draggable = false;
-            img.onerror = function() { this.style.display='none'; this.parentNode.textContent='🐾'; };
-            cell.appendChild(img);
-            return cell;
-        }
-
-        function prepareStrip(strip, finalColSymbols) {
-            const cellHeight = getCellHeight();
-            const cells = strip.children;
-            for (let i = 0; i < VISIBLE_ROWS; i++) {
-                const cellIndex = STRIP_OFFSET + i;
-                if (cellIndex < cells.length) {
-                    const symbol = finalColSymbols[i] || SYMBOLS[0];
-                    const img = cells[cellIndex].querySelector('img');
-                    if (img) {
-                        img.src = symbol.image;
-                        img.alt = symbol.id;
-                    }
-                }
-            }
-            return -(STRIP_OFFSET * cellHeight);
-        }
-
-        function getCellElement(pos) {
-            const strip = reelStrips[pos.col];
-            if (!strip) return null;
-            const cellIndex = STRIP_OFFSET + pos.row;
-            return strip.children[cellIndex];
-        }
-
-        function highlightPositions(positions) {
-            positions.forEach(pos => {
-                const cell = getCellElement(pos);
-                if (cell) cell.classList.add('win');
-            });
-        }
-
-        function clearHighlights() {
-            document.querySelectorAll('.reel-cell.win').forEach(c => c.classList.remove('win'));
-        }
-
-        function updateMultiplierBadges(mult) {
-            multBadges.forEach(badge => {
-                const val = parseInt(badge.dataset.mult);
-                badge.classList.toggle('active', val === mult);
-            });
-            if (mult > 0) playMultiplierSound(mult);
-        }
-
-        // ===== COIN CONFETTI (image-based) =====
-        function spawnCoins(count = 40) {
-            playCoinSound();   // play coin sound once when coins start falling
-
-            for (let i = 0; i < count; i++) {
-                const c = document.createElement('div');
-                c.className = 'coin';
-                c.style.left = Math.random() * 100 + '%';
-                c.style.top = '-30px';
-                const size = Math.random() * 10 + 20;  // 20–30px diameter
-                c.style.width = size + 'px';
-                c.style.height = size + 'px';
-                c.style.animationDuration = (Math.random() * 3 + 2) + 's';  // 2–5s
-                c.style.animationDelay = Math.random() * 0.5 + 's';
-                c.style.opacity = 0.9;
-                confettiContainer.appendChild(c);
-                setTimeout(() => c.remove(), 5000);
-            }
-        }
-
-        // ===================== WIN PROCESSING =====================
-        async function processWins(spinData, isFreeSpin) {
+        // ===================== FIREBASE (dynamic import with error handling) =====================
+        (async () => {
+            const loadingOverlay = document.getElementById('loadingOverlay');
             try {
-                const wins = spinData.wins || [];
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
+                const { getAuth, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+                const { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
 
-                for (const win of wins) {
-                    if (win.type === 'scatter') {
-                        messageDiv.textContent = `Scatter ${win.count}x! +${win.winAmount} coins`;
-                        playScatterWinSound();
-                        await new Promise(r => setTimeout(r, 1200));
-                        continue;
-                    }
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
+                    authDomain: "yourtv-c12eb.firebaseapp.com",
+                    projectId: "yourtv-c12eb",
+                    storageBucket: "yourtv-c1eb.firebasestorage.app",
+                    messagingSenderId: "28690991912",
+                    appId: "1:28690991912:web:3cbc631ba0201b7caede1d",
+                    measurementId: "G-CC7DLZS0NB"
+                };
 
-                    if (win.wildPositionsUsed && win.wildPositionsUsed.length > 0) {
-                        for (const wildPos of win.wildPositionsUsed) {
-                            const cell = getCellElement(wildPos);
-                            if (!cell) continue;
-                            const img = cell.querySelector('img');
-                            if (!img) continue;
-                            playDoubleSound();
-                            img.style.transition = 'transform 0.5s';
-                            img.style.transform = 'rotateY(90deg)';
-                            await new Promise(r => setTimeout(r, 250));
-                            img.src = win.symbol.image;
-                            img.style.transform = 'rotateY(0deg)';
-                            await new Promise(r => setTimeout(r, 250));
-                        }
-                    }
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
 
-                    highlightPositions(win.positions || []);
-                    playWinSound();
-                    messageDiv.textContent = `${win.symbol.id.toUpperCase()} x${win.count} = ${win.winAmount} coins`;
-                    await new Promise(r => setTimeout(r, 800));
-                    clearHighlights();
-                    await new Promise(r => setTimeout(r, 300));
-                }
+                let currentUser = null;
+                let unsubscribeCoins = null;
 
-                let totalWin = Number(spinData.totalWin ?? 0);
-                if (!Number.isFinite(totalWin) || totalWin <= 0) {
-                    totalWin = wins.reduce((sum, w) => sum + (Number(w.winAmount) || 0), 0);
-                }
+                // DOM elements
+                const startScreen = document.getElementById('startScreen');
+                const startBtn = document.getElementById('startBtn');
+                const header = document.querySelector('.nf-header');
+                const gameContainer = document.getElementById('gameContainer');
+                const balanceValueSpan = document.getElementById('balanceValue');
+                const logoutItem = document.getElementById('logoutItem');
 
-                if (totalWin > 0) {
-                    spawnCoins(50);
-                    playTotalWinSound();
-
-                    if (isFreeSpin) {
-                        freeSpinSessionTotalWin += totalWin;
-                        messageDiv.innerHTML = `
-                            <div style="font-weight:900; color:#f1c40f;">
-                                Free spin win: ${totalWin} 🪙<br>
-                                <span style="font-size:0.9em;">Total free spins win: ${freeSpinSessionTotalWin} 🪙</span>
-                            </div>`;
+                // Wait for auth state
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUser = user;
+                        // Hide loading overlay
+                        loadingOverlay.style.display = 'none';
+                        // Show start screen
+                        startScreen.style.display = 'flex';
+                        // Pre-load game only when user clicks start
+                        startBtn.addEventListener('click', () => {
+                            startScreen.style.display = 'none';
+                            header.style.display = 'flex';
+                            gameContainer.style.display = 'flex';
+                            initGame();
+                        }, { once: true });
                     } else {
-                        messageDiv.innerHTML = `
-                            <div style="font-weight:900; color:#f1c40f;">
-                                🎉 TOTAL PRIZE WON: ${totalWin} 🪙
-                            </div>`;
-                    }
-                } else {
-                    messageDiv.textContent = 'No win. Try again!';
-                }
-
-                const shouldUpdateBalance = !isFreeSpin || spinData.totalFreeSpinWin !== undefined;
-                if (shouldUpdateBalance && spinData.newBalance !== undefined) {
-                    pendingBetDeduction = 0;
-                    setBalance(spinData.newBalance);
-                }
-
-                if (spinData.totalFreeSpinWin !== undefined) {
-                    const totalFreeSpinWin = Number(spinData.totalFreeSpinWin);
-                    await animateTotalWin(totalFreeSpinWin);
-                }
-
-                if (spinData && spinData.freeSpinsAwarded > 0) {
-                    freeSpinsMsgDiv.textContent = `🎁 +${spinData.freeSpinsAwarded} Free Spins!`;
-                    playFreeSpinsSound();
-                } else if (spinData && spinData.freeSpinsRemaining > 0) {
-                    freeSpinsMsgDiv.textContent = `🎁 Free spins remaining: ${spinData.freeSpinsRemaining}`;
-                } else {
-                    if (isFreeSpin) {
-                        freeSpinsMsgDiv.textContent = '';
-                    }
-                }
-
-                if (spinData && spinData.currentMultiplier !== undefined) {
-                    updateMultiplierBadges(spinData.currentMultiplier);
-                }
-            } catch (err) {
-                console.error('processWins error:', err);
-                messageDiv.textContent = 'Error processing wins';
-                if (spinData && Number(spinData.totalWin) > 0) {
-                    messageDiv.textContent = `🎉 TOTAL PRIZE WON: ${Number(spinData.totalWin)} 🪙`;
-                }
-            }
-        }
-
-        // ===================== BUTTON STATE =====================
-        function updateButtons() {
-            const anyAutoActive = autoSpinning || autoFreeSpinsActive;
-            spinBtn.disabled = isSpinning || anyAutoActive;
-            autoSpinBtn.disabled = isSpinning || anyAutoActive;
-            stopBtn.disabled = !anyAutoActive;
-        }
-
-        // ===================== SPIN =====================
-        async function spin(isFreeSpin = false, callback = null) {
-            if (isSpinning) return;
-            isSpinning = true;
-            updateButtons();
-            messageDiv.textContent = '';
-            if (!isFreeSpin) {
-                freeSpinsMsgDiv.textContent = '';
-            }
-            clearHighlights();
-
-            const bet = currentBetValue || 1;
-
-            if (!isFreeSpin) {
-                if (bet > currentBalance) {
-                    messageDiv.textContent = 'Not enough coins for this bet.';
-                    isSpinning = false;
-                    updateButtons();
-                    return;
-                }
-                pendingBetDeduction = bet;
-                setBalance(currentBalance - bet);
-            }
-
-            startRollingSound();
-            const requestBody = isFreeSpin ? { isFreeSpin: true } : { bet };
-
-            const MIN_SPIN_DURATION = 2000;
-            const STOP_START_DELAY = 300;
-
-            const spinStates = reelStrips.map((_, col) => ({
-                currentY: 0,
-                spinning: true,
-                stopping: false,
-                stopStartTime: 0,
-                startY: 0,
-                targetY: 0,
-                stopDuration: 400,
-                stopDelay: col * STOP_START_DELAY,
-            }));
-
-            const spinStartTime = performance.now();
-
-            let responseReady = false;
-            let finalTranslateYs = new Array(REEL_COUNT).fill(0);
-            let grid = null;
-            let spinData = null;
-            let forceStop = false;
-
-            let lastTime = performance.now();
-            function animateReels(now) {
-                const deltaTime = Math.min(now - lastTime, 100);
-                lastTime = now;
-
-                let anyActive = false;
-
-                reelStrips.forEach((strip, col) => {
-                    const state = spinStates[col];
-                    if (!state.spinning && !state.stopping) return;
-
-                    anyActive = true;
-
-                    if (forceStop) {
-                        state.spinning = false;
-                        state.stopping = false;
-                        strip.style.transition = 'none';
-                        strip.style.transform = `translate3d(0, 0, 0)`;
-                        return;
-                    }
-
-                    if (state.spinning) {
-                        state.currentY -= (1200 * deltaTime) / 1000;
-                        const maxY = -(STRIP_LENGTH - VISIBLE_ROWS) * getCellHeight();
-                        if (state.currentY < maxY) state.currentY = 0;
-                        strip.style.transition = 'none';
-                        strip.style.transform = `translate3d(0, ${state.currentY}px, 0)`;
-                    }
-
-                    if (responseReady && !state.stopping &&
-                        (now - spinStartTime) >= MIN_SPIN_DURATION + state.stopDelay) {
-                        state.stopping = true;
-                        state.stopStartTime = performance.now();
-                        state.startY = state.currentY;
-                        state.targetY = finalTranslateYs[col];
-                        playReelStop(col);
-                    }
-
-                    if (state.stopping) {
-                        const elapsed = now - state.stopStartTime;
-                        const progress = Math.min(elapsed / state.stopDuration, 1);
-                        const eased = 1 - Math.pow(1 - progress, 3);
-                        const y = state.startY + (state.targetY - state.startY) * eased;
-                        strip.style.transition = 'none';
-                        strip.style.transform = `translate3d(0, ${y}px, 0)`;
-
-                        if (progress >= 1) {
-                            state.stopping = false;
-                            state.spinning = false;
-                            reelColumns[col].classList.add('stopping');
-                            setTimeout(() => reelColumns[col].classList.remove('stopping'), 150);
-                        }
+                        window.location.href = 'login.html';
                     }
                 });
 
-                if (anyActive) {
-                    requestAnimationFrame(animateReels);
-                } else {
+                async function initGame() {
+                    // Sync server balance with Firestore
+                    await syncServerBalanceFromFirestore();
+                    // Start listening to Firestore coin changes
+                    listenToCoins();
+                    // Create reels and UI
+                    createReels();
+                    updateMultiplierBadges(0);
+                    updateButtons();
+                    // Start background music
+                    startBackgroundMusic();
+                }
+
+                async function syncServerBalanceFromFirestore() {
+                    if (!currentUser) return;
+                    const userRef = doc(db, "users", currentUser.uid);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        const firebaseCoins = userSnap.data().coins || 0;
+                        await fetch('/api/sync-balance', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ balance: firebaseCoins })
+                        });
+                        setBalance(firebaseCoins);
+                    } else {
+                        await setDoc(userRef, { coins: 0 });
+                        await fetch('/api/sync-balance', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ balance: 0 })
+                        });
+                        setBalance(0);
+                    }
+                }
+
+                function listenToCoins() {
+                    if (!currentUser) return;
+                    if (unsubscribeCoins) unsubscribeCoins();
+                    const userRef = doc(db, "users", currentUser.uid);
+                    unsubscribeCoins = onSnapshot(userRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const coins = docSnap.data().coins || 0;
+                            setBalance(coins);
+                        }
+                    });
+                }
+
+                function setBalance(value) {
+                    const parsed = Number(value);
+                    if (!Number.isFinite(parsed)) return;
+                    currentBalance = Math.max(0, parsed);
+                    balanceValueSpan.textContent = String(currentBalance);
+                }
+
+                function getBalanceFromData(data) {
+                    if (!data || typeof data !== 'object') return undefined;
+                    if (data.newBalance !== undefined && data.newBalance !== null) return data.newBalance;
+                    if (data.balance !== undefined && data.balance !== null) return data.balance;
+                    return undefined;
+                }
+
+                // ===================== GAME CONSTANTS =====================
+                const VISIBLE_ROWS = 5;
+                const REEL_COUNT = 5;
+                const STRIP_LENGTH = 60;
+                const STRIP_OFFSET = 10;
+
+                const SYMBOLS = [
+                    { id: 'scatter', image: '/images/scatter.png', isScatter: true, isWild: false },
+                    { id: 'wild',     image: '/images/wild.png',     isScatter: false, isWild: true },
+                    { id: 'lion',     image: '/images/lion.png' },
+                    { id: 'tiger',    image: '/images/tiger.png' },
+                    { id: 'badger',   image: '/images/badger.png' },
+                    { id: 'bear',     image: '/images/bear.png' },
+                    { id: 'boar',     image: '/images/boar.png' },
+                    { id: 'dragon',   image: '/images/dragon.png' },
+                    { id: 'duck',     image: '/images/duck.png' },
+                    { id: 'eagle',    image: '/images/eagle.png' },
+                    { id: 'elephant', image: '/images/elephant.png' },
+                    { id: 'frog',     image: '/images/frog.png' },
+                    { id: 'goat',     image: '/images/goat.png' },
+                    { id: 'gorilla',  image: '/images/gorilla.png' },
+                    { id: 'hawk',     image: '/images/hawk.png' },
+                    { id: 'hedgehog', image: '/images/hedgehog.png' },
+                    { id: 'mouse',    image: '/images/mouse.png' },
+                    { id: 'owl',      image: '/images/owl.png' },
+                    { id: 'panther',  image: '/images/panther.png' },
+                    { id: 'pig',      image: '/images/pig.png' },
+                    { id: 'rabbit',   image: '/images/rabbit.png' },
+                    { id: 'racoon',   image: '/images/racoon.png' },
+                    { id: 'rhino',    image: '/images/rhino.png' },
+                    { id: 'rooster',  image: '/images/rooster.png' },
+                    { id: 'shark',    image: '/images/shark.png' },
+                    { id: 'squirrel', image: '/images/squirrel.png' },
+                    { id: 'wolf',     image: '/images/wolf.png' }
+                ];
+
+                const reelStrips = [];
+                const reelColumns = [];
+                let isSpinning = false;
+                let autoSpinning = false;
+                let autoSpinsRemaining = 0;
+                let autoSpinTimer = null;
+                let autoFreeSpinsActive = false;
+                let autoFreeSpinTimer = null;
+                let freeSpinSessionTotalWin = 0;
+                let currentBalance = 0;
+                let pendingBetDeduction = 0;
+                let currentBetValue = 1;
+
+                // ===================== AUDIO =====================
+                const REEL_AUDIO = [
+                    { roll: '/rolling-reels.wav', stop: null },
+                    { roll: '/rolling-reels.wav', stop: null },
+                    { roll: '/rolling-reels.wav', stop: null },
+                    { roll: '/rolling-reels.wav', stop: null },
+                    { roll: '/rolling-reels.wav', stop: null },
+                ];
+
+                let audioContext = null;
+                let rollingAudios = [];
+                let reelStoppedCount = 0;
+
+                function initAudio() {
+                    if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (audioContext.state === 'suspended') audioContext.resume();
+                }
+
+                function playTone(freq, dur, type='sine', vol=0.3, when=0) {
+                    initAudio();
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.type = type;
+                    osc.frequency.value = freq;
+                    gain.gain.value = vol;
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + dur + when);
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.start(audioContext.currentTime + when);
+                    osc.stop(audioContext.currentTime + dur + when);
+                }
+
+                function startRollingSound() {
+                    initAudio();
+                    reelStoppedCount = 0;
                     stopRollingSound();
-                    setTimeout(() => {
-                        if (spinData) {
-                            processWins(spinData, isFreeSpin).then(() => {
-                                isSpinning = false;
-                                updateButtons();
-                                if (!isFreeSpin && spinData.freeSpinsAwarded > 0) {
-                                    startAutoFreeSpins();
+
+                    REEL_AUDIO.forEach((cfg, index) => {
+                        let audio = new Audio(cfg.roll || '/rolling-reels.wav');
+                        audio.loop = true;
+                        audio.volume = 0.1;
+                        audio.play().catch(err => console.warn(`Reel ${index+1} rolling sound failed:`, err));
+                        rollingAudios.push(audio);
+                    });
+                }
+
+                function stopRollingSound() {
+                    rollingAudios.forEach(audio => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    });
+                    rollingAudios = [];
+                }
+
+                function playReelStop(reelIndex) {
+                    reelStoppedCount++;
+                    playTone(600 + (reelIndex + 1) * 80, 0.12, 'square', 0.9);
+                    playTone(400, 0.1, 'square', 0.8, 0.03);
+                }
+
+                function playWinSound() {
+                    const audio = new Audio('/winning.wav');
+                    audio.volume = 0.8;
+                    audio.play().catch(() => playTone(880, 0.15, 'sine', 0.8));
+                }
+
+                function playScatterWinSound() {
+                    const audio = new Audio('/you-won-scatter.wav');
+                    audio.volume = 0.8;
+                    audio.play().catch(() => playTone(523, 0.1, 'triangle', 0.8));
+                }
+
+                function playFreeSpinsSound() {
+                    const audio = new Audio('/free-spin.wav');
+                    audio.volume = 0.8;
+                    audio.play().catch(() => {
+                        playTone(400, 0.1, 'triangle', 0.7);
+                        setTimeout(() => playTone(500, 0.1, 'triangle', 0.7), 150);
+                        setTimeout(() => playTone(600, 0.2, 'triangle', 0.7), 300);
+                    });
+                }
+
+                function playTotalWinSound() {
+                    const audio = new Audio('/total-win.wav');
+                    audio.volume = 0.8;
+                    audio.play().catch(() => {
+                        [523, 659, 784, 1046].forEach((f,i)=>playTone(f,0.2,'sine',0.8,i*0.12));
+                    });
+                }
+
+                function playDoubleSound() {
+                    const audio = new Audio('/double.wav');
+                    audio.volume = 0.8;
+                    audio.play().catch(() => playTone(500, 0.08, 'square', 0.7));
+                }
+
+                function playCoinSound() {
+                    const audio = new Audio('/coin.wav');
+                    audio.volume = 0.5;
+                    audio.play().catch(() => {
+                        playTone(800, 0.08, 'square', 0.3);
+                        setTimeout(() => playTone(1000, 0.08, 'square', 0.3), 100);
+                        setTimeout(() => playTone(1200, 0.1, 'square', 0.25), 200);
+                    });
+                }
+
+                function playMultiplierSound(mult) {
+                    let file;
+                    switch(mult) {
+                        case 0: file = null; break;
+                        case 1: file = '/1-time.wav'; break;
+                        case 2: file = '/2-times.wav'; break;
+                        case 3: file = '/3-times.wav'; break;
+                        case 4: file = '/4-times.wav'; break;
+                        case 6: file = '/6-times.wav'; break;
+                        case 10: file = '/10-times.wav'; break;
+                        default: return;
+                    }
+                    if (file) {
+                        const audio = new Audio(file);
+                        audio.volume = 0.6;
+                        audio.play().catch(() => playTone(880, 0.1, 'sine', 0.5));
+                    }
+                }
+
+                function playButtonClickSound() {
+                    playTone(200, 0.08, 'square', 0.4);
+                    playTone(300, 0.08, 'square', 0.3, 0.04);
+                }
+
+                function startBackgroundMusic() {
+                    const bgMusic = document.getElementById('bgMusic');
+                    bgMusic.volume = 0.4;
+                    bgMusic.play().catch(err => console.warn('Background music failed:', err));
+                }
+
+                // ===================== ANIMATED TOTAL WIN COUNTER =====================
+                function animateTotalWin(finalTotal) {
+                    return new Promise((resolve) => {
+                        const messageDiv = document.getElementById('message');
+                        if (finalTotal <= 0) {
+                            messageDiv.innerHTML = `<div style="font-weight:900; color:#f1c40f;">🎉 FREE SPINS TOTAL WIN: 0 🪙</div>`;
+                            resolve();
+                            return;
+                        }
+
+                        const counterAudio = new Audio('/counter.wav');
+                        counterAudio.volume = 0.8;
+                        counterAudio.loop = true;
+                        counterAudio.play().catch(err => console.warn('Counter sound failed:', err));
+
+                        const duration = 2000;
+                        const startTime = performance.now();
+
+                        messageDiv.innerHTML = `<div style="font-weight:900; color:#f1c40f;">🎉 FREE SPINS TOTAL WIN: <span id="freeSpinTotalCounter">0</span> 🪙</div>`;
+
+                        function update(now) {
+                            const elapsed = now - startTime;
+                            const progress = Math.min(elapsed / duration, 1);
+                            const currentValue = Math.floor(progress * finalTotal);
+
+                            const el = document.getElementById('freeSpinTotalCounter');
+                            if (el) el.textContent = currentValue;
+
+                            if (progress < 1) {
+                                requestAnimationFrame(update);
+                            } else {
+                                if (el) el.textContent = finalTotal;
+                                counterAudio.pause();
+                                counterAudio.currentTime = 0;
+                                playTotalWinSound();
+                                resolve();
+                            }
+                        }
+
+                        requestAnimationFrame(update);
+                    });
+                }
+
+                // ===================== REELS =====================
+                function getCellHeight() { const cell = document.querySelector('.reel-cell'); return cell ? cell.offsetHeight : 110; }
+
+                function createReels() {
+                    const reelsContainer = document.getElementById('reelsContainer');
+                    reelsContainer.innerHTML = '';
+                    reelStrips.length = 0;
+                    reelColumns.length = 0;
+                    const containerWidth = reelsContainer.clientWidth - 20;
+                    const availableWidth = Math.min(containerWidth, 900);
+                    const gap = 10;
+                    const totalGap = gap * (REEL_COUNT - 1);
+                    const maxCellWidth = Math.floor((availableWidth - totalGap) / REEL_COUNT);
+                    const maxCellHeight = window.innerWidth < 600 ? 80 : 110;
+                    const cellSize = Math.min(maxCellWidth, maxCellHeight);
+                    reelsContainer.style.height = (cellSize * VISIBLE_ROWS + 20) + 'px';
+                    reelsContainer.style.overflowX = 'auto';
+
+                    for (let col = 0; col < REEL_COUNT; col++) {
+                        const column = document.createElement('div');
+                        column.className = 'reel-column';
+                        column.style.width = cellSize + 'px';
+                        column.style.height = (cellSize * VISIBLE_ROWS) + 'px';
+                        column.style.flex = `0 0 ${cellSize}px`;
+
+                        const strip = document.createElement('div');
+                        strip.className = 'reel-strip';
+                        strip.style.transform = 'translateY(0px)';
+                        column.appendChild(strip);
+                        reelsContainer.appendChild(column);
+                        reelColumns.push(column);
+                        reelStrips.push(strip);
+
+                        for (let i = 0; i < STRIP_LENGTH; i++) {
+                            const symbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                            const cell = createReelCell(symbol);
+                            cell.style.height = cellSize + 'px';
+                            cell.style.width = cellSize + 'px';
+                            strip.appendChild(cell);
+                        }
+                    }
+                }
+
+                function createReelCell(symbol) {
+                    const cell = document.createElement('div');
+                    cell.className = 'reel-cell';
+                    const img = document.createElement('img');
+                    img.src = symbol.image;
+                    img.alt = symbol.id;
+                    img.loading = 'eager';
+                    img.draggable = false;
+                    img.onerror = function() { this.style.display='none'; this.parentNode.textContent='🐾'; };
+                    cell.appendChild(img);
+                    return cell;
+                }
+
+                function prepareStrip(strip, finalColSymbols) {
+                    const cellHeight = getCellHeight();
+                    const cells = strip.children;
+                    for (let i = 0; i < VISIBLE_ROWS; i++) {
+                        const cellIndex = STRIP_OFFSET + i;
+                        if (cellIndex < cells.length) {
+                            const symbol = finalColSymbols[i] || SYMBOLS[0];
+                            const img = cells[cellIndex].querySelector('img');
+                            if (img) {
+                                img.src = symbol.image;
+                                img.alt = symbol.id;
+                            }
+                        }
+                    }
+                    return -(STRIP_OFFSET * cellHeight);
+                }
+
+                function getCellElement(pos) {
+                    const strip = reelStrips[pos.col];
+                    if (!strip) return null;
+                    const cellIndex = STRIP_OFFSET + pos.row;
+                    return strip.children[cellIndex];
+                }
+
+                function highlightPositions(positions) {
+                    positions.forEach(pos => {
+                        const cell = getCellElement(pos);
+                        if (cell) cell.classList.add('win');
+                    });
+                }
+
+                function clearHighlights() {
+                    document.querySelectorAll('.reel-cell.win').forEach(c => c.classList.remove('win'));
+                }
+
+                function updateMultiplierBadges(mult) {
+                    document.querySelectorAll('.mult-badge').forEach(badge => {
+                        const val = parseInt(badge.dataset.mult);
+                        badge.classList.toggle('active', val === mult);
+                    });
+                    if (mult > 0) playMultiplierSound(mult);
+                }
+
+                function spawnCoins(count = 40) {
+                    playCoinSound();
+                    for (let i = 0; i < count; i++) {
+                        const c = document.createElement('div');
+                        c.className = 'coin';
+                        c.style.left = Math.random() * 100 + '%';
+                        c.style.top = '-30px';
+                        const size = Math.random() * 10 + 20;
+                        c.style.width = size + 'px';
+                        c.style.height = size + 'px';
+                        c.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                        c.style.animationDelay = Math.random() * 0.5 + 's';
+                        c.style.opacity = 0.9;
+                        document.getElementById('confetti-container').appendChild(c);
+                        setTimeout(() => c.remove(), 5000);
+                    }
+                }
+
+                // ===================== WIN PROCESSING =====================
+                async function processWins(spinData, isFreeSpin) {
+                    const messageDiv = document.getElementById('message');
+                    const freeSpinsMsgDiv = document.getElementById('freeSpinsMsg');
+                    try {
+                        const wins = spinData.wins || [];
+
+                        for (const win of wins) {
+                            if (win.type === 'scatter') {
+                                messageDiv.textContent = `Scatter ${win.count}x! +${win.winAmount} coins`;
+                                playScatterWinSound();
+                                await new Promise(r => setTimeout(r, 1200));
+                                continue;
+                            }
+
+                            if (win.wildPositionsUsed && win.wildPositionsUsed.length > 0) {
+                                for (const wildPos of win.wildPositionsUsed) {
+                                    const cell = getCellElement(wildPos);
+                                    if (!cell) continue;
+                                    const img = cell.querySelector('img');
+                                    if (!img) continue;
+                                    playDoubleSound();
+                                    img.style.transition = 'transform 0.5s';
+                                    img.style.transform = 'rotateY(90deg)';
+                                    await new Promise(r => setTimeout(r, 250));
+                                    img.src = win.symbol.image;
+                                    img.style.transform = 'rotateY(0deg)';
+                                    await new Promise(r => setTimeout(r, 250));
                                 }
-                                if (callback) callback(spinData);
-                            });
+                            }
+
+                            highlightPositions(win.positions || []);
+                            playWinSound();
+                            messageDiv.textContent = `${win.symbol.id.toUpperCase()} x${win.count} = ${win.winAmount} coins`;
+                            await new Promise(r => setTimeout(r, 800));
+                            clearHighlights();
+                            await new Promise(r => setTimeout(r, 300));
+                        }
+
+                        let totalWin = Number(spinData.totalWin ?? 0);
+                        if (!Number.isFinite(totalWin) || totalWin <= 0) {
+                            totalWin = wins.reduce((sum, w) => sum + (Number(w.winAmount) || 0), 0);
+                        }
+
+                        if (totalWin > 0) {
+                            spawnCoins(50);
+                            playTotalWinSound();
+
+                            if (isFreeSpin) {
+                                freeSpinSessionTotalWin += totalWin;
+                                messageDiv.innerHTML = `
+                                    <div style="font-weight:900; color:#f1c40f;">
+                                        Free spin win: ${totalWin} 🪙<br>
+                                        <span style="font-size:0.9em;">Total free spins win: ${freeSpinSessionTotalWin} 🪙</span>
+                                    </div>`;
+                            } else {
+                                messageDiv.innerHTML = `
+                                    <div style="font-weight:900; color:#f1c40f;">
+                                        🎉 TOTAL PRIZE WON: ${totalWin} 🪙
+                                    </div>`;
+                            }
                         } else {
+                            messageDiv.textContent = 'No win. Try again!';
+                        }
+
+                        // Update Firestore with new balance from server
+                        const newBalance = getBalanceFromData(spinData);
+                        if (newBalance !== undefined && currentUser) {
+                            await updateDoc(doc(db, "users", currentUser.uid), { coins: newBalance });
+                            setBalance(newBalance);
+                        }
+
+                        if (spinData.totalFreeSpinWin !== undefined) {
+                            const totalFreeSpinWin = Number(spinData.totalFreeSpinWin);
+                            await animateTotalWin(totalFreeSpinWin);
+                        }
+
+                        if (spinData && spinData.freeSpinsAwarded > 0) {
+                            freeSpinsMsgDiv.textContent = `🎁 +${spinData.freeSpinsAwarded} Free Spins!`;
+                            playFreeSpinsSound();
+                        } else if (spinData && spinData.freeSpinsRemaining > 0) {
+                            freeSpinsMsgDiv.textContent = `🎁 Free spins remaining: ${spinData.freeSpinsRemaining}`;
+                        } else {
+                            if (isFreeSpin) {
+                                freeSpinsMsgDiv.textContent = '';
+                            }
+                        }
+
+                        if (spinData && spinData.currentMultiplier !== undefined) {
+                            updateMultiplierBadges(spinData.currentMultiplier);
+                        }
+                    } catch (err) {
+                        console.error('processWins error:', err);
+                        messageDiv.textContent = 'Error processing wins';
+                    }
+                }
+
+                // ===================== BUTTON STATE =====================
+                function updateButtons() {
+                    const spinBtn = document.getElementById('spinBtn');
+                    const autoSpinBtn = document.getElementById('autoSpinBtn');
+                    const stopBtn = document.getElementById('stopBtn');
+                    const anyAutoActive = autoSpinning || autoFreeSpinsActive;
+                    spinBtn.disabled = isSpinning || anyAutoActive;
+                    autoSpinBtn.disabled = isSpinning || anyAutoActive;
+                    stopBtn.disabled = !anyAutoActive;
+                }
+
+                // ===================== SPIN =====================
+                async function spin(isFreeSpin = false, callback = null) {
+                    if (isSpinning) return;
+                    isSpinning = true;
+                    updateButtons();
+                    document.getElementById('message').textContent = '';
+                    if (!isFreeSpin) document.getElementById('freeSpinsMsg').textContent = '';
+                    clearHighlights();
+
+                    const bet = currentBetValue || 1;
+
+                    if (!isFreeSpin) {
+                        if (bet > currentBalance) {
+                            document.getElementById('message').textContent = 'Not enough coins for this bet.';
                             isSpinning = false;
                             updateButtons();
-                            if (callback) callback(spinData);
+                            return;
                         }
-                    }, 200);
+                        pendingBetDeduction = bet;
+                        setBalance(currentBalance - bet);
+                    }
+
+                    startRollingSound();
+                    const requestBody = isFreeSpin ? { isFreeSpin: true } : { bet };
+
+                    const MIN_SPIN_DURATION = 2000;
+                    const STOP_START_DELAY = 300;
+
+                    const spinStates = reelStrips.map((_, col) => ({
+                        currentY: 0,
+                        spinning: true,
+                        stopping: false,
+                        stopStartTime: 0,
+                        startY: 0,
+                        targetY: 0,
+                        stopDuration: 400,
+                        stopDelay: col * STOP_START_DELAY,
+                    }));
+
+                    const spinStartTime = performance.now();
+
+                    let responseReady = false;
+                    let finalTranslateYs = new Array(REEL_COUNT).fill(0);
+                    let grid = null;
+                    let spinData = null;
+                    let forceStop = false;
+
+                    let lastTime = performance.now();
+                    function animateReels(now) {
+                        const deltaTime = Math.min(now - lastTime, 100);
+                        lastTime = now;
+
+                        let anyActive = false;
+
+                        reelStrips.forEach((strip, col) => {
+                            const state = spinStates[col];
+                            if (!state.spinning && !state.stopping) return;
+
+                            anyActive = true;
+
+                            if (forceStop) {
+                                state.spinning = false;
+                                state.stopping = false;
+                                strip.style.transition = 'none';
+                                strip.style.transform = `translate3d(0, 0, 0)`;
+                                return;
+                            }
+
+                            if (state.spinning) {
+                                state.currentY -= (1200 * deltaTime) / 1000;
+                                const maxY = -(STRIP_LENGTH - VISIBLE_ROWS) * getCellHeight();
+                                if (state.currentY < maxY) state.currentY = 0;
+                                strip.style.transition = 'none';
+                                strip.style.transform = `translate3d(0, ${state.currentY}px, 0)`;
+                            }
+
+                            if (responseReady && !state.stopping &&
+                                (now - spinStartTime) >= MIN_SPIN_DURATION + state.stopDelay) {
+                                state.stopping = true;
+                                state.stopStartTime = performance.now();
+                                state.startY = state.currentY;
+                                state.targetY = finalTranslateYs[col];
+                                playReelStop(col);
+                            }
+
+                            if (state.stopping) {
+                                const elapsed = now - state.stopStartTime;
+                                const progress = Math.min(elapsed / state.stopDuration, 1);
+                                const eased = 1 - Math.pow(1 - progress, 3);
+                                const y = state.startY + (state.targetY - state.startY) * eased;
+                                strip.style.transition = 'none';
+                                strip.style.transform = `translate3d(0, ${y}px, 0)`;
+
+                                if (progress >= 1) {
+                                    state.stopping = false;
+                                    state.spinning = false;
+                                    reelColumns[col].classList.add('stopping');
+                                    setTimeout(() => reelColumns[col].classList.remove('stopping'), 150);
+                                }
+                            }
+                        });
+
+                        if (anyActive) {
+                            requestAnimationFrame(animateReels);
+                        } else {
+                            stopRollingSound();
+                            setTimeout(() => {
+                                if (spinData) {
+                                    processWins(spinData, isFreeSpin).then(() => {
+                                        isSpinning = false;
+                                        updateButtons();
+                                        if (!isFreeSpin && spinData.freeSpinsAwarded > 0) {
+                                            startAutoFreeSpins();
+                                        }
+                                        if (callback) callback(spinData);
+                                    });
+                                } else {
+                                    isSpinning = false;
+                                    updateButtons();
+                                    if (callback) callback(spinData);
+                                }
+                            }, 200);
+                        }
+                    }
+
+                    requestAnimationFrame(animateReels);
+
+                    try {
+                        const res = await fetch('/api/spin', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(requestBody)
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'Spin failed');
+                        spinData = data;
+                        grid = data.grid;
+
+                        for (let col = 0; col < REEL_COUNT; col++) {
+                            const colSymbols = grid[col].map(sym => SYMBOLS.find(s => s.id === sym.id) || SYMBOLS[0]);
+                            finalTranslateYs[col] = prepareStrip(reelStrips[col], colSymbols);
+                        }
+                        responseReady = true;
+                    } catch (err) {
+                        console.error(err);
+                        forceStop = true;
+                        if (!isFreeSpin && pendingBetDeduction > 0) {
+                            setBalance(currentBalance + pendingBetDeduction);
+                            pendingBetDeduction = 0;
+                        }
+                        stopRollingSound();
+                        document.getElementById('message').textContent = 'Error: ' + err.message;
+                        isSpinning = false;
+                        updateButtons();
+                        if (callback) callback(spinData);
+                    }
                 }
-            }
 
-            requestAnimationFrame(animateReels);
-
-            try {
-                const res = await fetch('/api/spin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Spin failed');
-                spinData = data;
-                grid = data.grid;
-
-                for (let col = 0; col < REEL_COUNT; col++) {
-                    const colSymbols = grid[col].map(sym => SYMBOLS.find(s => s.id === sym.id) || SYMBOLS[0]);
-                    finalTranslateYs[col] = prepareStrip(reelStrips[col], colSymbols);
-                }
-                responseReady = true;
-            } catch (err) {
-                console.error(err);
-                forceStop = true;
-                if (!isFreeSpin && pendingBetDeduction > 0) {
-                    setBalance(currentBalance + pendingBetDeduction);
-                    pendingBetDeduction = 0;
-                }
-                stopRollingSound();
-                messageDiv.textContent = 'Error: ' + err.message;
-                isSpinning = false;
-                updateButtons();
-                if (callback) callback(spinData);
-            }
-        }
-
-        // ===================== AUTO SPIN =====================
-        function startAutoSpin() {
-            if (autoSpinning || isSpinning || autoFreeSpinsActive) return;
-            autoSpinning = true;
-            autoSpinsRemaining = 10;
-            updateButtons();
-            autoSpinLoop();
-        }
-        function autoSpinLoop() {
-            if (!autoSpinning) return;
-            if (autoSpinsRemaining <= 0) {
-                autoSpinning = false;
-                updateButtons();
-                messageDiv.textContent = 'Auto spin completed.';
-                return;
-            }
-            autoSpinsRemaining--;
-            spin(false, () => { autoSpinTimer = setTimeout(autoSpinLoop, 2000); });
-        }
-
-        // ===================== AUTO FREE SPINS =====================
-        function startAutoFreeSpins() {
-            if (autoFreeSpinsActive || isSpinning) return;
-            if (autoSpinning) {
-                autoSpinning = false;
-                clearTimeout(autoSpinTimer);
-            }
-            autoFreeSpinsActive = true;
-            freeSpinSessionTotalWin = 0;
-            updateButtons();
-            messageDiv.textContent = '🎰 Starting Free Spins!';
-            autoFreeSpinLoop();
-        }
-        function autoFreeSpinLoop() {
-            if (!autoFreeSpinsActive) return;
-            spin(true, (spinData) => {
-                if (!autoFreeSpinsActive) return;
-                if (spinData && spinData.freeSpinsRemaining > 0) {
-                    autoFreeSpinTimer = setTimeout(autoFreeSpinLoop, 2000);
-                } else {
-                    autoFreeSpinsActive = false;
+                // ===================== AUTO SPIN =====================
+                function startAutoSpin() {
+                    if (autoSpinning || isSpinning || autoFreeSpinsActive) return;
+                    autoSpinning = true;
+                    autoSpinsRemaining = 10;
                     updateButtons();
-                    messageDiv.innerHTML = `Free spins completed!<br>Total won: ${freeSpinSessionTotalWin} 🪙`;
-                    freeSpinsMsgDiv.textContent = '';
+                    autoSpinLoop();
                 }
-            });
-        }
-        function stopAllAuto() {
-            if (autoFreeSpinsActive) {
-                autoFreeSpinsActive = false;
-                clearTimeout(autoFreeSpinTimer);
-                updateButtons();
-                messageDiv.innerHTML = `Free spins stopped.<br>Total won: ${freeSpinSessionTotalWin} 🪙`;
-                freeSpinsMsgDiv.textContent = '';
-            } else if (autoSpinning) {
-                autoSpinning = false;
-                clearTimeout(autoSpinTimer);
-                updateButtons();
-                messageDiv.textContent = 'Auto spin stopped.';
-            }
-        }
+                function autoSpinLoop() {
+                    if (!autoSpinning) return;
+                    if (autoSpinsRemaining <= 0) {
+                        autoSpinning = false;
+                        updateButtons();
+                        document.getElementById('message').textContent = 'Auto spin completed.';
+                        return;
+                    }
+                    autoSpinsRemaining--;
+                    spin(false, () => { autoSpinTimer = setTimeout(autoSpinLoop, 2000); });
+                }
 
-        // ===================== STATE =====================
-        async function fetchState() {
-            try {
-                const res = await fetch('/api/state', { cache: 'no-store' });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Unable to load state');
-                const serverBalance = getBalanceFromData(data);
-                if (serverBalance !== undefined) {
-                    const displayBalance = pendingBetDeduction > 0
-                        ? Math.max(0, Number(serverBalance) - pendingBetDeduction)
-                        : serverBalance;
-                    setBalance(displayBalance);
+                // ===================== AUTO FREE SPINS =====================
+                function startAutoFreeSpins() {
+                    if (autoFreeSpinsActive || isSpinning) return;
+                    if (autoSpinning) {
+                        autoSpinning = false;
+                        clearTimeout(autoSpinTimer);
+                    }
+                    autoFreeSpinsActive = true;
+                    freeSpinSessionTotalWin = 0;
+                    updateButtons();
+                    document.getElementById('message').textContent = '🎰 Starting Free Spins!';
+                    autoFreeSpinLoop();
                 }
-                if (data.freeSpins) {
-                    freeSpinsMsgDiv.textContent = `🎁 Free spins remaining: ${data.freeSpins}`;
+                function autoFreeSpinLoop() {
+                    if (!autoFreeSpinsActive) return;
+                    spin(true, (spinData) => {
+                        if (!autoFreeSpinsActive) return;
+                        if (spinData && spinData.freeSpinsRemaining > 0) {
+                            autoFreeSpinTimer = setTimeout(autoFreeSpinLoop, 2000);
+                        } else {
+                            autoFreeSpinsActive = false;
+                            updateButtons();
+                            document.getElementById('message').innerHTML = `Free spins completed!<br>Total won: ${freeSpinSessionTotalWin} 🪙`;
+                            document.getElementById('freeSpinsMsg').textContent = '';
+                        }
+                    });
                 }
-                updateMultiplierBadges(data.multiplier || 0);
+                function stopAllAuto() {
+                    if (autoFreeSpinsActive) {
+                        autoFreeSpinsActive = false;
+                        clearTimeout(autoFreeSpinTimer);
+                        updateButtons();
+                        document.getElementById('message').innerHTML = `Free spins stopped.<br>Total won: ${freeSpinSessionTotalWin} 🪙`;
+                        document.getElementById('freeSpinsMsg').textContent = '';
+                    } else if (autoSpinning) {
+                        autoSpinning = false;
+                        clearTimeout(autoSpinTimer);
+                        updateButtons();
+                        document.getElementById('message').textContent = 'Auto spin stopped.';
+                    }
+                }
+
+                // ===================== LOGOUT =====================
+                document.getElementById('logoutItem').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (unsubscribeCoins) unsubscribeCoins();
+                    await signOut(auth);
+                    window.location.href = 'login.html';
+                });
+
+                // ===================== EVENT LISTENERS =====================
+                document.getElementById('spinBtn').addEventListener('click', () => spin(false));
+                document.getElementById('autoSpinBtn').addEventListener('click', startAutoSpin);
+                document.getElementById('stopBtn').addEventListener('click', stopAllAuto);
+                document.getElementById('menuBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const dropdownMenu = document.getElementById('dropdownMenu');
+                    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+                });
+                document.addEventListener('click', () => {
+                    document.getElementById('dropdownMenu').style.display = 'none';
+                });
+                document.getElementById('betDisplayBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const betOptions = document.getElementById('betOptions');
+                    betOptions.style.display = betOptions.style.display === 'block' ? 'none' : 'block';
+                });
+                document.querySelectorAll('.bet-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        currentBetValue = parseInt(option.dataset.value);
+                        document.getElementById('betDisplayValue').textContent = currentBetValue;
+                        document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                        document.getElementById('betOptions').style.display = 'none';
+                    });
+                });
+                window.addEventListener('resize', () => { if (!isSpinning) createReels(); });
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('button, .btn, .header-icon-btn, #startBtn')) {
+                        playButtonClickSound();
+                    }
+                });
+
             } catch (err) {
-                console.error('fetchState error:', err);
+                console.error('Failed to load Firebase:', err);
+                loadingOverlay.innerHTML = '<p style="color:red;">Error loading game. Please refresh.</p>';
             }
-        }
-
-        // ===================== START GAME =====================
-        function startGame() {
-            playButtonClickSound();
-            startBackgroundMusic();
-            startScreen.style.display = 'none';
-            header.style.display = 'flex';
-            gameContainer.style.display = 'flex';
-            fetchState();
-            createReels();
-            updateMultiplierBadges(0);
-            updateButtons();
-        }
-
-        // ===================== INIT =====================
-        startBtn.addEventListener('click', startGame);
-
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('button, .btn, .header-icon-btn, #startBtn')) {
-                playButtonClickSound();
-            }
-        });
-
-        // ===================== CUSTOM BET DROPDOWN =====================
-        betDisplayBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            betOptions.style.display = betOptions.style.display === 'block' ? 'none' : 'block';
-        });
-
-        document.querySelectorAll('.bet-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const value = parseInt(option.dataset.value, 10);
-                currentBetValue = value;
-                betDisplayValue.textContent = value;
-                document.querySelectorAll('.bet-option').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                betOptions.style.display = 'none';
-            });
-        });
-
-        document.addEventListener('click', () => {
-            betOptions.style.display = 'none';
-        });
-
-        // ===================== EVENTS =====================
-        spinBtn.addEventListener('click', () => spin(false));
-        autoSpinBtn.addEventListener('click', startAutoSpin);
-        stopBtn.addEventListener('click', stopAllAuto);
-        window.addEventListener('resize', () => { if (!isSpinning) createReels(); });
-
-        menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
-        });
-        document.addEventListener('click', () => {
-            dropdownMenu.style.display = 'none';
-        });
-        dropdownMenu.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+        })();
     </script>
 </body>
 </html>
