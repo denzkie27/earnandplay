@@ -145,6 +145,9 @@
         .header-icon-btn:hover { background: rgba(255,255,255,.12); transform: scale(1.05); border-color: rgba(255,255,255,.15); }
         .header-icon-btn .material-icons { font-size: 22px; opacity: .85; }
         .header-balance {
+            display: flex;
+            align-items: center;
+            gap: 5px;
             font-size: 1.2em;
             font-weight: bold;
             color: #f1c40f;
@@ -152,6 +155,10 @@
             padding: 5px 15px;
             border-radius: 20px;
             border: 1px solid rgba(241,196,15,0.3);
+        }
+        .header-balance img {
+            width: 24px;
+            height: 24px;
         }
         .dropdown-menu {
             position: absolute;
@@ -538,7 +545,8 @@
             </div>
         </div>
         <div class="header-balance">
-            💰 <span id="balanceValue">0</span>
+            <img src="/coin.png" alt="Coin">
+            <span id="balanceValue">0</span>
         </div>
     </header>
 
@@ -641,11 +649,8 @@
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUser = user;
-                        // Hide loading overlay
                         loadingOverlay.style.display = 'none';
-                        // Show start screen
                         startScreen.style.display = 'flex';
-                        // Pre-load game only when user clicks start
                         startBtn.addEventListener('click', () => {
                             startScreen.style.display = 'none';
                             header.style.display = 'flex';
@@ -658,15 +663,11 @@
                 });
 
                 async function initGame() {
-                    // Sync server balance with Firestore
                     await syncServerBalanceFromFirestore();
-                    // Start listening to Firestore coin changes
                     listenToCoins();
-                    // Create reels and UI
                     createReels();
                     updateMultiplierBadges(0);
                     updateButtons();
-                    // Start background music
                     startBackgroundMusic();
                 }
 
@@ -836,17 +837,21 @@
 
                 function playScatterWinSound() {
                     const audio = new Audio('/you-won-scatter.wav');
-                    audio.volume = 0.8;
-                    audio.play().catch(() => playTone(523, 0.1, 'triangle', 0.8));
+                    audio.volume = 1.0; // increased volume
+                    audio.play().catch(() => {
+                        playTone(523, 0.1, 'triangle', 0.9);
+                        setTimeout(() => playTone(659, 0.1, 'triangle', 0.9), 80);
+                        setTimeout(() => playTone(784, 0.15, 'triangle', 0.9), 160);
+                    });
                 }
 
                 function playFreeSpinsSound() {
                     const audio = new Audio('/free-spin.wav');
-                    audio.volume = 0.8;
+                    audio.volume = 1.0; // increased volume
                     audio.play().catch(() => {
-                        playTone(400, 0.1, 'triangle', 0.7);
-                        setTimeout(() => playTone(500, 0.1, 'triangle', 0.7), 150);
-                        setTimeout(() => playTone(600, 0.2, 'triangle', 0.7), 300);
+                        playTone(400, 0.1, 'triangle', 0.8);
+                        setTimeout(() => playTone(500, 0.1, 'triangle', 0.8), 150);
+                        setTimeout(() => playTone(600, 0.2, 'triangle', 0.8), 300);
                     });
                 }
 
@@ -860,8 +865,11 @@
 
                 function playDoubleSound() {
                     const audio = new Audio('/double.wav');
-                    audio.volume = 0.8;
-                    audio.play().catch(() => playTone(500, 0.08, 'square', 0.7));
+                    audio.volume = 1.0; // increased volume
+                    audio.play().catch(() => {
+                        playTone(500, 0.08, 'square', 0.8);
+                        setTimeout(() => playTone(700, 0.08, 'square', 0.8), 60);
+                    });
                 }
 
                 function playCoinSound() {
@@ -888,8 +896,8 @@
                     }
                     if (file) {
                         const audio = new Audio(file);
-                        audio.volume = 0.6;
-                        audio.play().catch(() => playTone(880, 0.1, 'sine', 0.5));
+                        audio.volume = 0.9; // increased volume
+                        audio.play().catch(() => playTone(880, 0.1, 'sine', 0.7));
                     }
                 }
 
