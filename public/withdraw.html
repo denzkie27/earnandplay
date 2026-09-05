@@ -299,6 +299,264 @@
             color: #666;
             padding: 20px;
         }
+
+        /* ===================== SUPPORT FAB ===================== */
+        .support-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #fff;
+            font-size: 26px;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(99,102,241,0.45);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .support-fab:hover {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 8px 32px rgba(99,102,241,0.55);
+        }
+        .support-fab:active {
+            transform: scale(0.9);
+        }
+        .support-fab .unread-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ff003c;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 20px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            box-shadow: 0 2px 10px rgba(255,0,60,0.4);
+            border: 2px solid #111;
+        }
+        .support-fab .unread-badge.show {
+            display: flex;
+        }
+
+        /* ===================== SUPPORT OVERLAY ===================== */
+        .dialog-overlay.support-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            z-index: 10000;
+        }
+        .dialog-overlay.support-overlay.show {
+            display: flex;
+        }
+        .support-dialog-box {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        @media (min-width: 769px) {
+            .support-dialog-box {
+                max-width: 600px;
+                height: 92vh;
+                border-radius: 24px;
+                overflow: hidden;
+                box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+            }
+            .dialog-overlay.support-overlay {
+                padding: 4vh 20px;
+            }
+        }
+        .support-dialog-inner {
+            background: linear-gradient(160deg, #111827, #0b0f19);
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .support-header-new {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+            background: rgba(0,0,0,0.3);
+        }
+        .support-back-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            color: #888;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .support-back-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .support-header-info {
+            flex: 1;
+        }
+        .support-title-new {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .support-sub-new {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+        }
+        .support-input-area-new {
+            padding: 16px 20px;
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+        .support-input-area-new input {
+            flex: 1;
+            padding: 14px 18px;
+            border: none;
+            outline: none;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 15px;
+        }
+        .support-input-area-new input:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+        }
+        .support-input-area-new input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+        .support-send-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+        }
+        .support-send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        .support-send-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .support-messages-new {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .support-msg-new {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-width: 85%;
+        }
+        .support-msg-new.user {
+            align-self: flex-end;
+        }
+        .support-msg-new.admin {
+            align-self: flex-start;
+        }
+        .support-msg-new .msg-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        .support-msg-new.user .msg-bubble {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #fff;
+            border-bottom-right-radius: 6px;
+        }
+        .support-msg-new.admin .msg-bubble {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #ddd;
+            border-bottom-left-radius: 6px;
+        }
+        .support-msg-new .msg-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 6px;
+        }
+        .support-msg-new.admin .msg-label {
+            color: #818cf8;
+        }
+        .support-empty-new {
+            text-align: center;
+            color: rgba(255,255,255,0.3);
+            padding: 40px 20px;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        .support-empty-new .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        @media(max-width: 600px) {
+            .support-header-new { padding: 16px; }
+            .support-input-area-new { padding: 12px 16px; gap: 8px; }
+            .support-input-area-new input { padding: 12px 16px; font-size: 14px; }
+            .support-send-btn { width: 44px; height: 44px; font-size: 20px; }
+            .support-messages-new { padding: 16px; gap: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -332,8 +590,9 @@
                 Available: <span id="availableBalance">0</span> coins
             </div>
             <div class="rate-info">
-                💱 Conversion: 100 coins = ₱5<br>
-                Minimum withdrawal: 100 coins
+                💱 Conversion rates:<br>
+                2,000 coins = ₱5 &nbsp;|&nbsp; 4,000 coins = ₱10 &nbsp;|&nbsp; 8,000 coins = ₱20<br>
+                20,000 coins = ₱50 &nbsp;|&nbsp; 40,000 coins = ₱100 &nbsp;|&nbsp; 80,000 coins = ₱200
             </div>
 
             <!-- Amount options -->
@@ -362,6 +621,37 @@
         </div>
     </div>
 
+    <!-- ===================== SUPPORT FAB ===================== -->
+    <button class="support-fab" id="supportFab" onclick="openSupport()">
+        💬
+        <span class="unread-badge" id="supportUnread">0</span>
+    </button>
+
+    <!-- ===================== SUPPORT OVERLAY ===================== -->
+    <div class="dialog-overlay support-overlay" id="supportOverlay">
+        <div class="support-dialog-box">
+            <div class="support-dialog-inner">
+                <div class="support-header-new">
+                    <button class="support-back-btn" onclick="closeSupport()">✕</button>
+                    <div class="support-header-info">
+                        <div class="support-title-new">💬 Support Chat</div>
+                        <div class="support-sub-new">We typically reply within a few hours</div>
+                    </div>
+                </div>
+                <div class="support-input-area-new">
+                    <input type="text" id="supportInput" placeholder="Type your message..." maxlength="1000" autocomplete="off">
+                    <button class="support-send-btn" id="supportSendBtn" onclick="sendSupportMsg()">➤</button>
+                </div>
+                <div class="support-messages-new" id="supportMessages">
+                    <div class="support-empty-new">
+                        <div class="empty-icon">💬</div>
+                        Loading messages...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         (async () => {
             const loadingOverlay = document.getElementById('loadingOverlay');
@@ -373,6 +663,12 @@
             const submitBtn = document.getElementById('submitBtn');
             const message = document.getElementById('message');
             const historyList = document.getElementById('historyList');
+            const supportFab = document.getElementById('supportFab');
+            const supportOverlay = document.getElementById('supportOverlay');
+            const supportMessages = document.getElementById('supportMessages');
+            const supportInput = document.getElementById('supportInput');
+            const supportSendBtn = document.getElementById('supportSendBtn');
+            const supportUnread = document.getElementById('supportUnread');
 
             try {
                 const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
@@ -395,42 +691,42 @@
 
                 let currentUser = null;
                 let currentBalance = 0;
-                let selectedAmount = 100; // default
+                let selectedCoins = 2000; // default first tier
 
-                // Define withdrawal tiers
+                // Withdrawal tiers
                 const tiers = [
-                    { coins: 100, peso: 5 },
-                    { coins: 200, peso: 10 },
-                    { coins: 500, peso: 25 },
-                    { coins: 1000, peso: 50 }
+                    { coins: 2000, peso: 5 },
+                    { coins: 4000, peso: 10 },
+                    { coins: 8000, peso: 20 },
+                    { coins: 20000, peso: 50 },
+                    { coins: 40000, peso: 100 },
+                    { coins: 80000, peso: 200 }
                 ];
 
-                // Populate amount options
+                // Render amount options
                 function renderAmountOptions() {
                     amountOptions.innerHTML = '';
                     tiers.forEach(tier => {
                         const div = document.createElement('div');
-                        div.className = 'amount-option' + (tier.coins === selectedAmount ? ' selected' : '');
+                        div.className = 'amount-option' + (tier.coins === selectedCoins ? ' selected' : '');
                         div.innerHTML = `
-                            <span class="coins">${tier.coins} coins</span>
+                            <span class="coins">${tier.coins.toLocaleString()} coins</span>
                             <span class="peso">₱${tier.peso}</span>
                         `;
                         div.addEventListener('click', () => {
-                            selectedAmount = tier.coins;
+                            selectedCoins = tier.coins;
                             renderAmountOptions();
                         });
                         amountOptions.appendChild(div);
                     });
                 }
 
-                // Update balance display
                 function updateBalanceDisplay(coins) {
                     currentBalance = coins;
                     headerBalance.textContent = coins.toLocaleString();
                     availableBalance.textContent = coins.toLocaleString();
                 }
 
-                // Check auth state
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUser = user;
@@ -440,6 +736,8 @@
                         renderAmountOptions();
                         await loadBalance();
                         await loadHistory();
+                        listenToBalance();
+                        checkUnreadSupport();
                     } else {
                         window.location.href = 'login.html';
                     }
@@ -455,7 +753,6 @@
                     }
                 }
 
-                // Real-time balance updates
                 function listenToBalance() {
                     const userRef = doc(db, "users", currentUser.uid);
                     onSnapshot(userRef, (docSnap) => {
@@ -482,7 +779,7 @@
                         <div class="history-item">
                             <div>
                                 <div class="ref">${w.refNumber || 'N/A'}</div>
-                                <div class="amount">₱${w.pesoAmount} (${w.coinsDeducted} coins)</div>
+                                <div class="amount">₱${w.pesoAmount} (${w.coinsDeducted.toLocaleString()} coins)</div>
                                 <div style="font-size:0.8em;color:#888;">${w.gcashName || ''}</div>
                             </div>
                             <span class="status ${w.status || 'pending'}">${(w.status || 'pending').toUpperCase()}</span>
@@ -503,7 +800,7 @@
                         return;
                     }
 
-                    const tier = tiers.find(t => t.coins === selectedAmount);
+                    const tier = tiers.find(t => t.coins === selectedCoins);
                     if (currentBalance < tier.coins) {
                         message.textContent = 'Insufficient coins.';
                         return;
@@ -541,8 +838,87 @@
                     submitBtn.disabled = false;
                 });
 
-                // Start listening to balance changes
-                listenToBalance();
+                // ===================== SUPPORT FUNCTIONS =====================
+                window.openSupport = () => {
+                    if (!currentUser) {
+                        message.textContent = 'Please sign in to contact support.';
+                        return;
+                    }
+                    supportOverlay.classList.add('show');
+                    loadSupportMessages();
+                    setTimeout(() => supportInput.focus(), 300);
+                };
+
+                window.closeSupport = () => {
+                    supportOverlay.classList.remove('show');
+                };
+
+                async function loadSupportMessages() {
+                    supportMessages.innerHTML = '<div class="support-empty-new">Loading…</div>';
+                    const q = query(collection(db, "support_messages"), where("uid", "==", currentUser.uid));
+                    const querySnapshot = await getDocs(q);
+                    const msgs = [];
+                    querySnapshot.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+                    msgs.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+                    if (msgs.length === 0) {
+                        supportMessages.innerHTML = '<div class="support-empty-new"><div class="empty-icon">💬</div>No messages yet.</div>';
+                        return;
+                    }
+
+                    supportMessages.innerHTML = msgs.map(m => `
+                        <div class="support-msg-new ${m.role === 'admin' ? 'admin' : 'user'}">
+                            ${m.role === 'admin' ? '<div class="msg-label">Admin</div>' : ''}
+                            <div class="msg-bubble">${m.message || ''}</div>
+                        </div>
+                    `).join('');
+                    supportMessages.scrollTop = supportMessages.scrollHeight;
+                }
+
+                window.sendSupportMsg = async () => {
+                    if (!supportInput.value.trim() || !currentUser) return;
+                    supportSendBtn.disabled = true;
+                    try {
+                        await addDoc(collection(db, "support_messages"), {
+                            uid: currentUser.uid,
+                            message: supportInput.value.trim(),
+                            role: 'user',
+                            read: false,
+                            createdAt: serverTimestamp()
+                        });
+                        supportInput.value = '';
+                        await loadSupportMessages();
+                    } catch (err) {
+                        console.error(err);
+                    }
+                    supportSendBtn.disabled = false;
+                    supportInput.focus();
+                };
+
+                async function checkUnreadSupport() {
+                    if (!currentUser) return;
+                    const q = query(collection(db, "support_messages"), where("uid", "==", currentUser.uid), where("role", "==", "admin"), where("read", "==", false));
+                    const snap = await getDocs(q);
+                    if (snap.size > 0) {
+                        supportUnread.textContent = snap.size;
+                        supportUnread.classList.add('show');
+                    } else {
+                        supportUnread.classList.remove('show');
+                    }
+                }
+
+                // Enter key for support
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && supportOverlay.classList.contains('show') && document.activeElement === supportInput) {
+                        e.preventDefault();
+                        sendSupportMsg();
+                    }
+                });
+
+                // Close support on overlay click outside dialog
+                supportOverlay.addEventListener('click', (e) => {
+                    if (e.target === supportOverlay) closeSupport();
+                });
 
             } catch (err) {
                 console.error('Failed to load Firebase:', err);
