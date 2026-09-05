@@ -4,19 +4,19 @@
   <script src='//libtl.com/sdk.js' data-zone='10973078' data-sdk='show_10973078'></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Earn Coins — YOUR TV</title>
+  <title>Earn Coins — Animal Slots</title>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
 
   <style>
-/* ── Remove mobile tap highlight from EVERY element ── */
-* {
-    -webkit-tap-highlight-color: transparent;
-}
+    /* ── Remove mobile tap highlight from EVERY element ── */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
 
-/* ── Remove focus outline for mouse clicks (keep for keyboard navigation) ── */
-:focus:not(:focus-visible) {
-    outline: none;
-}
+    /* ── Remove focus outline for mouse clicks (keep for keyboard navigation) ── */
+    :focus:not(:focus-visible) {
+      outline: none;
+    }
 
     /* ========== ROOT VARIABLES ========== */
     :root {
@@ -156,7 +156,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap;
     }
     .header-left {
       display: flex;
@@ -192,7 +191,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
     }
     .coins {
       background: rgba(255, 255, 255, .06);
@@ -210,98 +208,6 @@
       width: 14px;
       height: 14px;
       flex-shrink: 0;
-    }
-    .earn-btn,
-    .auth-btn-header {
-      border: none;
-      padding: 7px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 12px;
-      font-family: inherit;
-      transition: .2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      letter-spacing: .01em;
-    }
-    .earn-btn {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(229, 9, 20, .3);
-    }
-    .earn-btn:hover {
-      background: var(--accent-hover);
-      transform: scale(1.03);
-    }
-    .auth-btn-header {
-      background: rgba(255, 255, 255, .06);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, .08);
-    }
-    .auth-btn-header:hover {
-      background: rgba(255, 255, 255, .12);
-    }
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(255, 255, 255, .06);
-      border: 1px solid rgba(255, 255, 255, .08);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: .2s;
-      position: relative;
-    }
-    .user-info:hover {
-      background: rgba(255, 255, 255, .1);
-    }
-    .user-dropdown {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      margin-top: 6px;
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, .08);
-      border-radius: 14px;
-      overflow: hidden;
-      min-width: 180px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, .6);
-      display: none;
-      z-index: 99999;
-      padding: 4px 0;
-    }
-    .user-dropdown a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      color: rgba(255, 255, 255, .75);
-      font-size: 12px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: .15s;
-      cursor: pointer;
-    }
-    .user-dropdown a:hover {
-      background: rgba(255, 255, 255, .06);
-      color: #fff;
-    }
-    .user-dropdown .logout-opt {
-      border-top: 1px solid rgba(255, 255, 255, .06);
-      color: #ff5a5a;
-    }
-    .user-dropdown .logout-opt:hover {
-      background: rgba(255, 90, 90, .08);
-      color: #ff5a5a;
-    }
-    .user-dropdown .nx-icon {
-      font-size: 18px;
-      opacity: .6;
     }
 
     /* ========== MAIN CONTAINER ========== */
@@ -1014,8 +920,6 @@
     @media(max-width: 900px) {
       .nf-header { padding: 6px 8px; }
       .coins { font-size: 11px; padding: 4px 7px; border-radius: 10px; }
-      .earn-btn, .auth-btn-header { font-size: 10px; padding: 4px 10px; border-radius: 6px; }
-      .user-info { font-size: 10px; padding: 4px 7px; border-radius: 6px; }
     }
     @media(max-width: 768px) {
       body { background: #0a0a0a; }
@@ -1062,7 +966,7 @@
   </style>
 </head>
 
-<body onclick="closeAllDropdowns(event)">
+<body>
   <!-- ========== HEADER ========== -->
   <header class="nf-header">
     <div class="header-left">
@@ -1074,18 +978,6 @@
         <img src="/coin.png" class="coin-icon" alt="Coin" />
         <span id="coinsHeader">0</span>
       </div>
-      <button class="earn-btn" id="earnBtn"><span class="nx-icon nx-icon--sm"></span> Earn</button>
-      <button class="auth-btn-header" id="authLoginBtn" style="display:none;"><span class="nx-icon nx-icon--sm">login</span> Sign In</button>
-      <div class="user-info" id="userInfo" style="display:none;" onclick="toggleDropdown(event)">
-        <span class="nx-icon">account_circle</span>
-        <span class="nx-icon nx-icon--xs" style="opacity:.5;">expand_more</span>
-        <div class="user-dropdown" id="userDropdown">
-          <a onclick="event.stopPropagation(); location.href='profile.html'"><span class="nx-icon">person</span> My Profile</a>
-          <a onclick="event.stopPropagation(); location.href='watchlist.html'"><span class="nx-icon">bookmark</span> Watchlist</a>
-          <a onclick="event.stopPropagation(); location.href='settings.html'"><span class="nx-icon">settings</span> Settings</a>
-          <a class="logout-opt" id="logoutLink" onclick="event.stopPropagation(); logout()"><span class="nx-icon">logout</span> Sign Out</a>
-        </div>
-      </div>
     </div>
   </header>
 
@@ -1095,7 +987,7 @@
         <img src="/coin.png" class="coin-logo" alt="Coin" />
       </div>
       <div class="page-title">Earn Coins</div>
-      <div class="subtitle">Watch ads & unlock premium content</div>
+      <div class="subtitle">Watch ads to earn coins for the slot game</div>
 
       <div class="coins-big">
         <img src="/coin.png" class="coin-icon-big" alt="Coin" />
@@ -1119,13 +1011,13 @@
     </div>
 
     <div class="instructions">
-      <h3 style="color:#f9a8d4;">📌 How to Earn Coins</h3>
+      <h3 style="color:#f9a8d4;">📌 How to Earn Coins for Animal Slots</h3>
       <ol>
         <li>Click <strong>Reward Interstitial</strong> or <strong>Reward Popup</strong> above.</li>
-        <li>Click <strong>Get Reward</strong> when prompted.</li>
-        <li>Let the ad fully load in the new window — wait a few seconds.</li>
-        <li>Close the ad window to return here and claim your coins.</li>
-        <li>Repeat to accumulate coins and unlock any movie or TV show!</li>
+        <li>Watch the ad and wait for it to finish.</li>
+        <li>Your coins will be added automatically to your slot game balance.</li>
+        <li>Use coins to spin the reels and win prizes.</li>
+        <li>Withdraw your winnings via the <strong>Withdraw Coins</strong> button.</li>
       </ol>
     </div>
   </div>
@@ -1180,8 +1072,6 @@
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        document.getElementById("userInfo").style.display = "flex";
-        document.getElementById("authLoginBtn").style.display = "none";
         await ensureUserExists();
         listenToCoins();
       } else {
@@ -1221,7 +1111,7 @@
       }
     }
 
-    // NEW: Update slot game balance (server-side session)
+    // Update slot game balance (server-side session)
     async function addCoinsToSlot(amount) {
       try {
         const res = await fetch('/api/add-coins', {
@@ -1335,27 +1225,6 @@
       container.appendChild(overlay);
       overlay.querySelector(".dialog-btn").onclick = () => overlay.remove();
     }
-
-    window.logout = async function() {
-      if (unsubscribeCoins) unsubscribeCoins();
-      if (supportUnsubscribe) supportUnsubscribe();
-      await auth.signOut();
-      location.href = 'login.html';
-    };
-
-    window.toggleDropdown = function(e) {
-      e.stopPropagation();
-      const dd = document.getElementById("userDropdown");
-      dd.style.display = dd.style.display === "block" ? "none" : "block";
-    };
-
-    window.closeAllDropdowns = function(e) {
-      const userInfo = document.getElementById("userInfo");
-      if (userInfo && !userInfo.contains(e.target)) {
-        const dd = document.getElementById("userDropdown");
-        if (dd) dd.style.display = "none";
-      }
-    };
 
     // ==================== SUPPORT CHAT FUNCTIONS ====================
     async function getUsername(uid) {
