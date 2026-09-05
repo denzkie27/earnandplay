@@ -530,8 +530,8 @@
         <button id="startBtn">START GAME</button>
     </div>
 
-    <!-- Background music -->
-    <audio id="bgMusic" src="/background-music.wav" loop></audio>
+    <!-- Background music (now uses gameplay.wav) -->
+    <audio id="bgMusic" loop></audio>
 
     <!-- ===================== HEADER ===================== -->
     <header class="nf-header" style="display:none;">
@@ -541,6 +541,7 @@
             </button>
             <div class="dropdown-menu" id="dropdownMenu">
                 <a href="earn.html" class="dropdown-item">Earn Coins</a>
+                <a href="withdraw.html" class="dropdown-item">Withdraw</a>
                 <a href="#" class="dropdown-item" id="logoutItem">Logout</a>
             </div>
         </div>
@@ -809,7 +810,7 @@
                     REEL_AUDIO.forEach((cfg, index) => {
                         let audio = new Audio(cfg.roll || '/rolling-reels.wav');
                         audio.loop = true;
-                        audio.volume = 0.1;
+                        audio.volume = 0.3;   // unchanged
                         audio.play().catch(err => console.warn(`Reel ${index+1} rolling sound failed:`, err));
                         rollingAudios.push(audio);
                     });
@@ -825,19 +826,20 @@
 
                 function playReelStop(reelIndex) {
                     reelStoppedCount++;
-                    playTone(600 + (reelIndex + 1) * 80, 0.12, 'square', 0.9);
-                    playTone(400, 0.1, 'square', 0.8, 0.03);
+                    // Unchanged clank volume
+                    playTone(600 + (reelIndex + 1) * 80, 0.12, 'square', 0.5);
+                    playTone(400, 0.1, 'square', 0.4, 0.03);
                 }
 
                 function playWinSound() {
                     const audio = new Audio('/winning.wav');
-                    audio.volume = 0.8;
+                    audio.volume = 1.0;   // max
                     audio.play().catch(() => playTone(880, 0.15, 'sine', 0.8));
                 }
 
                 function playScatterWinSound() {
                     const audio = new Audio('/you-won-scatter.wav');
-                    audio.volume = 1.0; // increased volume
+                    audio.volume = 1.0;
                     audio.play().catch(() => {
                         playTone(523, 0.1, 'triangle', 0.9);
                         setTimeout(() => playTone(659, 0.1, 'triangle', 0.9), 80);
@@ -847,7 +849,7 @@
 
                 function playFreeSpinsSound() {
                     const audio = new Audio('/free-spin.wav');
-                    audio.volume = 1.0; // increased volume
+                    audio.volume = 1.0;
                     audio.play().catch(() => {
                         playTone(400, 0.1, 'triangle', 0.8);
                         setTimeout(() => playTone(500, 0.1, 'triangle', 0.8), 150);
@@ -857,7 +859,7 @@
 
                 function playTotalWinSound() {
                     const audio = new Audio('/total-win.wav');
-                    audio.volume = 0.8;
+                    audio.volume = 1.0;
                     audio.play().catch(() => {
                         [523, 659, 784, 1046].forEach((f,i)=>playTone(f,0.2,'sine',0.8,i*0.12));
                     });
@@ -865,7 +867,7 @@
 
                 function playDoubleSound() {
                     const audio = new Audio('/double.wav');
-                    audio.volume = 1.0; // increased volume
+                    audio.volume = 1.0;
                     audio.play().catch(() => {
                         playTone(500, 0.08, 'square', 0.8);
                         setTimeout(() => playTone(700, 0.08, 'square', 0.8), 60);
@@ -874,7 +876,7 @@
 
                 function playCoinSound() {
                     const audio = new Audio('/coin.wav');
-                    audio.volume = 0.5;
+                    audio.volume = 1.0;
                     audio.play().catch(() => {
                         playTone(800, 0.08, 'square', 0.3);
                         setTimeout(() => playTone(1000, 0.08, 'square', 0.3), 100);
@@ -896,18 +898,19 @@
                     }
                     if (file) {
                         const audio = new Audio(file);
-                        audio.volume = 0.9; // increased volume
+                        audio.volume = 1.0;
                         audio.play().catch(() => playTone(880, 0.1, 'sine', 0.7));
                     }
                 }
 
                 function playButtonClickSound() {
-                    playTone(200, 0.08, 'square', 0.4);
-                    playTone(300, 0.08, 'square', 0.3, 0.04);
+                    playTone(200, 0.08, 'square', 0.6);   // slightly louder
+                    playTone(300, 0.08, 'square', 0.5, 0.04);
                 }
 
                 function startBackgroundMusic() {
                     const bgMusic = document.getElementById('bgMusic');
+                    bgMusic.src = '/gameplay.wav';
                     bgMusic.volume = 0.4;
                     bgMusic.play().catch(err => console.warn('Background music failed:', err));
                 }
