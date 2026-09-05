@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Withdraw</title>
+    <title>Withdraw — Animal Slots</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
@@ -127,11 +127,11 @@
             min-height: 0;
             display: flex;
             flex-direction: column;
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
             margin: 20px auto;
             padding: 20px;
-            overflow: hidden;
+            overflow-y: auto;
         }
         .withdraw-card {
             background: rgba(17,17,17,0.85);
@@ -139,10 +139,7 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 30px 70px rgba(0,0,0,0.8);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            margin-bottom: 20px;
         }
         .withdraw-title {
             text-align: center;
@@ -152,6 +149,25 @@
             text-shadow: 0 0 20px rgba(241,196,15,0.5);
             margin-bottom: 20px;
         }
+        .balance-display {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .balance-display span {
+            color: #f1c40f;
+        }
+        .rate-info {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(201,168,76,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #ccc;
+        }
         .form-group {
             margin-bottom: 15px;
         }
@@ -160,16 +176,49 @@
             margin-bottom: 5px;
             color: #ddd;
             font-weight: bold;
+            font-size: 0.9em;
         }
         .form-group input,
         .form-group select {
             width: 100%;
             padding: 12px;
             border: 1px solid #444;
-            border-radius: 8px;
+            border-radius: 10px;
             background: #1a1a1a;
             color: #fff;
             font-size: 1em;
+            text-align: center;
+        }
+        .amount-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .amount-option {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .amount-option.selected {
+            background: #e67e22;
+            border-color: #f39c12;
+            box-shadow: 0 0 15px rgba(230,126,34,0.5);
+        }
+        .amount-option .coins {
+            display: block;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+        .amount-option .peso {
+            display: block;
+            font-size: 0.9em;
+            color: #4ade80;
         }
         .btn-submit {
             width: 100%;
@@ -191,9 +240,64 @@
         }
         .message {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 10px;
             min-height: 20px;
             color: #2ecc71;
+            font-weight: bold;
+        }
+        .history-section {
+            background: rgba(17,17,17,0.85);
+            border: 1px solid #2a2a2a;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .history-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #f1c40f;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .history-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .history-item .ref {
+            font-family: monospace;
+            color: #818cf8;
+            font-size: 0.8em;
+        }
+        .history-item .amount {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+        .history-item .status {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 20px;
+            background: rgba(245,158,11,0.2);
+            color: #f59e0b;
+        }
+        .history-item .status.paid {
+            background: rgba(34,197,94,0.2);
+            color: #22c55e;
+        }
+        .history-item .status.cancelled {
+            background: rgba(239,68,68,0.2);
+            color: #ef4444;
+        }
+        .empty-history {
+            text-align: center;
+            color: #666;
+            padding: 20px;
         }
     </style>
 </head>
@@ -210,49 +314,70 @@
             <a href="index.html" class="header-icon-btn">
                 <span class="material-icons">arrow_back</span>
             </a>
+            <a href="index.html" class="header-icon-btn">
+                <span class="material-icons">home</span>
+            </a>
         </div>
         <div class="header-balance">
             <img src="/coin.png" alt="Coin">
-            <span id="balanceValue">0</span>
+            <span id="headerBalance">0</span>
         </div>
     </header>
 
     <!-- ===================== MAIN CONTENT ===================== -->
-    <div class="container" style="display:none;" id="mainContainer">
+    <div class="container" id="mainContainer" style="display:none;">
         <div class="withdraw-card">
             <div class="withdraw-title">💰 Withdraw</div>
+            <div class="balance-display">
+                Available: <span id="availableBalance">0</span> coins
+            </div>
+            <div class="rate-info">
+                💱 Conversion: 100 coins = ₱5<br>
+                Minimum withdrawal: 100 coins
+            </div>
+
+            <!-- Amount options -->
+            <div class="amount-options" id="amountOptions">
+                <!-- dynamically filled -->
+            </div>
+
             <div class="form-group">
-                <label>Available Balance</label>
-                <input type="text" id="availableBalance" disabled value="0">
+                <label>GCash Registered Name</label>
+                <input type="text" id="gcashName" placeholder="e.g. Juan Dela Cruz">
             </div>
             <div class="form-group">
-                <label>Amount to Withdraw</label>
-                <input type="number" id="withdrawAmount" min="1" placeholder="Enter amount">
+                <label>GCash Mobile Number</label>
+                <input type="tel" id="gcashNumber" placeholder="09XXXXXXXXX" maxlength="11">
             </div>
-            <div class="form-group">
-                <label>Payment Method</label>
-                <select id="paymentMethod">
-                    <option value="gcash">GCash</option>
-                    <option value="paymaya">PayMaya</option>
-                    <option value="bank">Bank Transfer</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Account Details</label>
-                <input type="text" id="accountDetails" placeholder="Account number / name">
-            </div>
-            <button class="btn-submit" id="submitBtn">Submit Request</button>
+
+            <button class="btn-submit" id="submitBtn">Submit Withdrawal</button>
             <div class="message" id="message"></div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">📋 Withdrawal History</div>
+            <div id="historyList">
+                <div class="empty-history">Loading…</div>
+            </div>
         </div>
     </div>
 
     <script>
         (async () => {
             const loadingOverlay = document.getElementById('loadingOverlay');
+            const header = document.querySelector('.nf-header');
+            const mainContainer = document.getElementById('mainContainer');
+            const headerBalance = document.getElementById('headerBalance');
+            const availableBalance = document.getElementById('availableBalance');
+            const amountOptions = document.getElementById('amountOptions');
+            const submitBtn = document.getElementById('submitBtn');
+            const message = document.getElementById('message');
+            const historyList = document.getElementById('historyList');
+
             try {
                 const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
                 const { getAuth, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
-                const { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp, updateDoc } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+                const { getFirestore, doc, getDoc, onSnapshot, collection, addDoc, query, where, getDocs, serverTimestamp, updateDoc } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
 
                 const firebaseConfig = {
                     apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
@@ -269,14 +394,52 @@
                 const db = getFirestore(app);
 
                 let currentUser = null;
+                let currentBalance = 0;
+                let selectedAmount = 100; // default
 
+                // Define withdrawal tiers
+                const tiers = [
+                    { coins: 100, peso: 5 },
+                    { coins: 200, peso: 10 },
+                    { coins: 500, peso: 25 },
+                    { coins: 1000, peso: 50 }
+                ];
+
+                // Populate amount options
+                function renderAmountOptions() {
+                    amountOptions.innerHTML = '';
+                    tiers.forEach(tier => {
+                        const div = document.createElement('div');
+                        div.className = 'amount-option' + (tier.coins === selectedAmount ? ' selected' : '');
+                        div.innerHTML = `
+                            <span class="coins">${tier.coins} coins</span>
+                            <span class="peso">₱${tier.peso}</span>
+                        `;
+                        div.addEventListener('click', () => {
+                            selectedAmount = tier.coins;
+                            renderAmountOptions();
+                        });
+                        amountOptions.appendChild(div);
+                    });
+                }
+
+                // Update balance display
+                function updateBalanceDisplay(coins) {
+                    currentBalance = coins;
+                    headerBalance.textContent = coins.toLocaleString();
+                    availableBalance.textContent = coins.toLocaleString();
+                }
+
+                // Check auth state
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         currentUser = user;
                         loadingOverlay.style.display = 'none';
-                        document.querySelector('.nf-header').style.display = 'flex';
-                        document.getElementById('mainContainer').style.display = 'flex';
+                        header.style.display = 'flex';
+                        mainContainer.style.display = 'flex';
+                        renderAmountOptions();
                         await loadBalance();
+                        await loadHistory();
                     } else {
                         window.location.href = 'login.html';
                     }
@@ -284,68 +447,102 @@
 
                 async function loadBalance() {
                     const userRef = doc(db, "users", currentUser.uid);
-                    const userSnap = await getDoc(userRef);
-                    if (userSnap.exists()) {
-                        const coins = userSnap.data().coins || 0;
-                        document.getElementById('balanceValue').textContent = coins;
-                        document.getElementById('availableBalance').value = coins;
+                    const snapshot = await getDoc(userRef);
+                    if (snapshot.exists()) {
+                        updateBalanceDisplay(snapshot.data().coins || 0);
                     } else {
-                        document.getElementById('balanceValue').textContent = '0';
-                        document.getElementById('availableBalance').value = '0';
+                        updateBalanceDisplay(0);
                     }
                 }
 
-                document.getElementById('submitBtn').addEventListener('click', async () => {
-                    const amount = parseInt(document.getElementById('withdrawAmount').value);
-                    const paymentMethod = document.getElementById('paymentMethod').value;
-                    const accountDetails = document.getElementById('accountDetails').value.trim();
-                    const available = parseInt(document.getElementById('availableBalance').value);
+                // Real-time balance updates
+                function listenToBalance() {
+                    const userRef = doc(db, "users", currentUser.uid);
+                    onSnapshot(userRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            updateBalanceDisplay(docSnap.data().coins || 0);
+                        }
+                    });
+                }
 
-                    if (!amount || amount <= 0) {
-                        document.getElementById('message').textContent = 'Please enter a valid amount.';
-                        return;
-                    }
-                    if (amount > available) {
-                        document.getElementById('message').textContent = 'Insufficient balance.';
-                        return;
-                    }
-                    if (!accountDetails) {
-                        document.getElementById('message').textContent = 'Please enter account details.';
+                async function loadHistory() {
+                    historyList.innerHTML = '<div class="empty-history">Loading…</div>';
+                    const q = query(collection(db, "withdrawals"), where("uid", "==", currentUser.uid));
+                    const querySnapshot = await getDocs(q);
+                    const withdrawals = [];
+                    querySnapshot.forEach(doc => withdrawals.push({ id: doc.id, ...doc.data() }));
+                    withdrawals.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+                    if (withdrawals.length === 0) {
+                        historyList.innerHTML = '<div class="empty-history">No withdrawals yet.</div>';
                         return;
                     }
 
-                    // Disable button to prevent double submission
-                    document.getElementById('submitBtn').disabled = true;
+                    historyList.innerHTML = withdrawals.map(w => `
+                        <div class="history-item">
+                            <div>
+                                <div class="ref">${w.refNumber || 'N/A'}</div>
+                                <div class="amount">₱${w.pesoAmount} (${w.coinsDeducted} coins)</div>
+                                <div style="font-size:0.8em;color:#888;">${w.gcashName || ''}</div>
+                            </div>
+                            <span class="status ${w.status || 'pending'}">${(w.status || 'pending').toUpperCase()}</span>
+                        </div>
+                    `).join('');
+                }
+
+                submitBtn.addEventListener('click', async () => {
+                    if (!currentUser) {
+                        message.textContent = 'Please sign in first.';
+                        return;
+                    }
+
+                    const name = document.getElementById('gcashName').value.trim();
+                    const number = document.getElementById('gcashNumber').value.trim();
+                    if (!name || !/^09\d{9}$/.test(number)) {
+                        message.textContent = 'Please enter valid GCash name and 11-digit number.';
+                        return;
+                    }
+
+                    const tier = tiers.find(t => t.coins === selectedAmount);
+                    if (currentBalance < tier.coins) {
+                        message.textContent = 'Insufficient coins.';
+                        return;
+                    }
+
+                    submitBtn.disabled = true;
+                    message.textContent = 'Processing…';
 
                     try {
-                        // Add withdrawal request
+                        const refNumber = 'WTH-' + Date.now().toString().slice(-6);
                         await addDoc(collection(db, "withdrawals"), {
-                            userId: currentUser.uid,
-                            amount: amount,
-                            paymentMethod: paymentMethod,
-                            accountDetails: accountDetails,
+                            uid: currentUser.uid,
+                            gcashName: name,
+                            gcashNumber: number,
+                            coinsDeducted: tier.coins,
+                            pesoAmount: tier.peso,
+                            refNumber: refNumber,
                             status: 'pending',
                             createdAt: serverTimestamp()
                         });
 
-                        // Deduct amount from user's coins
+                        // Deduct coins
                         const userRef = doc(db, "users", currentUser.uid);
-                        const newBalance = available - amount;
-                        await updateDoc(userRef, { coins: newBalance });
+                        await updateDoc(userRef, { coins: currentBalance - tier.coins });
 
-                        // Update UI
-                        document.getElementById('balanceValue').textContent = newBalance;
-                        document.getElementById('availableBalance').value = newBalance;
-                        document.getElementById('withdrawAmount').value = '';
-                        document.getElementById('accountDetails').value = '';
-                        document.getElementById('message').textContent = 'Withdrawal request submitted successfully!';
+                        message.textContent = 'Withdrawal request submitted!';
+                        document.getElementById('gcashName').value = '';
+                        document.getElementById('gcashNumber').value = '';
+                        await loadHistory();
                     } catch (err) {
                         console.error(err);
-                        document.getElementById('message').textContent = 'Error submitting request.';
+                        message.textContent = 'Error: ' + err.message;
                     }
 
-                    document.getElementById('submitBtn').disabled = false;
+                    submitBtn.disabled = false;
                 });
+
+                // Start listening to balance changes
+                listenToBalance();
 
             } catch (err) {
                 console.error('Failed to load Firebase:', err);
