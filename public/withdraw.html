@@ -672,8 +672,8 @@
 
             try {
                 const { initializeApp } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js");
-                const { getAuth, onAuthStateChanged, signOut } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
-                const { getFirestore, doc, getDoc, onSnapshot, collection, addDoc, query, where, getDocs, serverTimestamp, updateDoc } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
+                const { getAuth, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js");
+                const { getFirestore, doc, getDoc, onSnapshot, collection, addDoc, query, where, serverTimestamp, updateDoc } = await import("https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js");
 
                 const firebaseConfig = {
                     apiKey: "AIzaSyAzjmVZUTLMeX1R-W2V86RBKrKP6bgl6iU",
@@ -691,7 +691,8 @@
 
                 let currentUser = null;
                 let currentBalance = 0;
-                let selectedCoins = 2000; // default first tier
+                let selectedCoins = 2000; // default
+                let supportUnsubscribe = null;
 
                 // Withdrawal tiers
                 const tiers = [
@@ -703,7 +704,6 @@
                     { coins: 80000, peso: 200 }
                 ];
 
-                // Render amount options
                 function renderAmountOptions() {
                     amountOptions.innerHTML = '';
                     tiers.forEach(tier => {
@@ -822,7 +822,6 @@
                             createdAt: serverTimestamp()
                         });
 
-                        // Deduct coins
                         const userRef = doc(db, "users", currentUser.uid);
                         await updateDoc(userRef, { coins: currentBalance - tier.coins });
 
@@ -838,7 +837,7 @@
                     submitBtn.disabled = false;
                 });
 
-                // ===================== SUPPORT FUNCTIONS =====================
+                // ===================== SUPPORT FUNCTIONS (REAL-TIME) =====================
                 window.openSupport = () => {
                     if (!currentUser) {
                         message.textContent = 'Please sign in to contact support.';
@@ -851,28 +850,45 @@
 
                 window.closeSupport = () => {
                     supportOverlay.classList.remove('show');
+                    if (supportUnsubscribe) {
+                        supportUnsubscribe();
+                        supportUnsubscribe = null;
+                    }
                 };
+
+                async function getUsername(uid) {
+                    try {
+                        const userRef = doc(db, "users", uid);
+                        const userSnap = await getDoc(userRef);
+                        return userSnap.exists() ? (userSnap.data().displayName || userSnap.data().username || "Unknown User") : "Unknown User";
+                    } catch (err) {
+                        return "Unknown User";
+                    }
+                }
 
                 async function loadSupportMessages() {
                     supportMessages.innerHTML = '<div class="support-empty-new">Loading…</div>';
                     const q = query(collection(db, "support_messages"), where("uid", "==", currentUser.uid));
-                    const querySnapshot = await getDocs(q);
-                    const msgs = [];
-                    querySnapshot.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
-                    msgs.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
-
-                    if (msgs.length === 0) {
-                        supportMessages.innerHTML = '<div class="support-empty-new"><div class="empty-icon">💬</div>No messages yet.</div>';
-                        return;
-                    }
-
-                    supportMessages.innerHTML = msgs.map(m => `
-                        <div class="support-msg-new ${m.role === 'admin' ? 'admin' : 'user'}">
-                            ${m.role === 'admin' ? '<div class="msg-label">Admin</div>' : ''}
-                            <div class="msg-bubble">${m.message || ''}</div>
-                        </div>
-                    `).join('');
-                    supportMessages.scrollTop = supportMessages.scrollHeight;
+                    if (supportUnsubscribe) supportUnsubscribe();
+                    supportUnsubscribe = onSnapshot(q, (snap) => {
+                        if (snap.empty) {
+                            supportMessages.innerHTML = '<div class="support-empty-new"><div class="empty-icon">💬</div>No messages yet.</div>';
+                            return;
+                        }
+                        const msgs = [];
+                        snap.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+                        msgs.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+                        supportMessages.innerHTML = msgs.map(m => `
+                            <div class="support-msg-new ${m.role === 'admin' ? 'admin' : 'user'}">
+                                ${m.role === 'admin' ? '<div class="msg-label">Admin</div>' : ''}
+                                <div class="msg-bubble">${m.message || ''}</div>
+                            </div>
+                        `).join('');
+                        supportMessages.scrollTop = supportMessages.scrollHeight;
+                    }, (err) => {
+                        console.error(err);
+                        supportMessages.innerHTML = '<div class="support-empty-new" style="color:#ef4444;">Failed to load messages.</div>';
+                    });
                 }
 
                 window.sendSupportMsg = async () => {
@@ -881,13 +897,14 @@
                     try {
                         await addDoc(collection(db, "support_messages"), {
                             uid: currentUser.uid,
+                            username: await getUsername(currentUser.uid),
                             message: supportInput.value.trim(),
                             role: 'user',
                             read: false,
                             createdAt: serverTimestamp()
                         });
                         supportInput.value = '';
-                        await loadSupportMessages();
+                        // Real-time update will re-render automatically
                     } catch (err) {
                         console.error(err);
                     }
